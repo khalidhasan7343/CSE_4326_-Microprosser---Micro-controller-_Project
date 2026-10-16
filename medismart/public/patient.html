@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MediSmart | Patient Portal</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: #f7fafc; }
+    header { background: #2b6cb0; color: white; padding: 18px 25px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { margin: 0; font-size: 20px; }
+    .btn-logout { background: #c53030; color: #fff; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    .container { max-width: 800px; margin: 30px auto; padding: 0 20px; text-align: center; }
+    .vital-box { background: white; border-radius: 12px; padding: 30px; margin: 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+    .vital-title { font-size: 16px; color: #718096; text-transform: uppercase; letter-spacing: 1px; }
+    .vital-val { font-size: 56px; font-weight: bold; color: #2d3748; margin: 15px 0; }
+    .status-badge { display: inline-block; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+    .normal { background: #c6f6d5; color: #22543d; }
+    .warning { background: #feebc8; color: #7b341e; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🏥 My Personal Health Dashboard</h1>
+  <button class="btn-logout" onclick="logout()">Log Out</button>
+</header>
+
+<div class="container">
+  <div class="vital-box">
+    <div class="vital-title">❤️ Heart Rate (Pulse)</div>
+    <div class="vital-val"><span id="bpm">--</span> <span style="font-size:24px; color:#a0aec0;">BPM</span></div>
+    <span id="bpmBadge" class="status-badge normal">Checking...</span>
+  </div>
+
+  <div class="vital-box">
+    <div class="vital-title">🫁 Blood Oxygen Level</div>
+    <div class="vital-val"><span id="spo2">--</span> <span style="font-size:24px; color:#a0aec0;">%</span></div>
+    <span id="spo2Badge" class="status-badge normal">Checking...</span>
+  </div>
+</div>
+
+<script src="firebase-config.js"></script>
+<script>
+
+
+firebase.auth().onAuthStateChanged(user => {
+  if (!user) window.location.href = "login.html";
+});
+
+function logout() {
+  firebase.auth().signOut().then(() => { window.location.href = "login.html"; });
+}
+
+firebase.database().ref("vitals").on("value", (snapshot) => {
+  const data = snapshot.val();
+  if (!data) return;
+
+  const bpm = data.bpm || 0;
+  const spo2 = data.spo2 || 0;
+
+  document.getElementById("bpm").innerText = bpm > 0 ? bpm.toFixed(0) : "0";
+  document.getElementById("spo2").innerText = spo2 > 0 ? spo2.toFixed(0) : "0";
+
+  const bpmBadge = document.getElementById("bpmBadge");
+  if (bpm === 0) {
+    bpmBadge.className = "status-badge warning";
+    bpmBadge.innerText = "Sensor Ready / Place Finger";
+  } else if (bpm >= 60 && bpm <= 100) {
+    bpmBadge.className = "status-badge normal";
+    bpmBadge.innerText = "Normal Heart Rhythm";
+  } else {
+    bpmBadge.className = "status-badge warning";
+    bpmBadge.innerText = "Elevated Heart Rate";
+  }
+
+  const spo2Badge = document.getElementById("spo2Badge");
+  if (spo2 === 0) {
+    spo2Badge.className = "status-badge warning";
+    spo2Badge.innerText = "Sensor Ready / Place Finger";
+  } else if (spo2 >= 95) {
+    spo2Badge.className = "status-badge normal";
+    spo2Badge.innerText = "Optimal Oxygen Level";
+  } else {
+    spo2Badge.className = "status-badge warning";
+    spo2Badge.innerText = "Low Oxygen Reading";
+  }
+});
+</script>
+
+</body>
+</html>

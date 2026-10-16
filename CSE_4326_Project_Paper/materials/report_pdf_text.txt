@@ -1,0 +1,714 @@
+        Autonomous Smart Dual Infusion and Patient
+             Monitoring System Using ESP32
+                                  Md. Turjo Hasnat, Md. Khalid Hasan, Moieb Al Jawad,
+                                            Swarup Deb Nath, and Md Shakib
+                        Student IDs: 0112410067, 0112410009, 0112410289, 0112230150, 0112410546
+                                           BSCSE, United International University
+                              Course: CSE 4326 — Microprocessor and Microcontroller Project
+                                              Supervisor: Arnab Bhattacharjee
+
+
+   Abstract—Manual supervision of intravenous fluid delivery and      to connect sensors with different interfaces, process their
+separate bedside monitoring can make it difficult to coordinate       outputs, maintain actuator states, and exchange settings and
+fluid status, patient observations, and caregiver intervention.       telemetry over a network without blocking the local control
+This project addresses that integration problem through an
+educational embedded prototype called MediSmart. The im-              sequence. The project is therefore relevant to microcontroller
+plementation combines an ESP32 with a MAX30102 optical                interfacing, digital signal processing, real-time task design,
+sensor, an AD8232 electrocardiogram front end, and an HX711           electromechanical actuation, and web-based monitoring.
+load-cell interface. Its firmware estimates pulse rate, oxygen
+saturation, and remaining fluid volume, drives saline, syringe,       B. Objectives and Scope
+and oxygen-designated servo mechanisms, and controls a local
+buzzer. A Firebase Realtime Database connects device telemetry           The implemented objectives are to estimate remaining fluid
+and control settings to doctor, patient, and family web interfaces.   from a load-cell reading; acquire optical pulse and oxygen-
+The supplied photographs, source code, and dashboard captures         saturation signals and an ECG analog signal; operate servo
+document the assembled platform and a consistent 324.1 mL             channels according to programmed conditions; activate a lo-
+displayed/database fluid estimate with an open-valve state above      cal buzzer during the firmware’s low-oxygen condition; and
+a 320 mL stopping threshold. Measurement accuracy, actual
+delivered dose, end-to-end latency, power efficiency, and clinical    expose monitoring/control views through Firebase. The term
+suitability remain unquantified because the supplied materials        dual infusion refers here to the saline and syringe mechanisms
+contain no calibrated experimental dataset.                           described by the project, rather than to two independently
+   Index Terms—ESP32, intravenous monitoring, syringe actua-          measured and calibrated infusion channels. A third servo
+tion, MAX30102, AD8232, HX711, Firebase, embedded systems             channel is designated for an oxygen-related mechanism.
+                                                                         The scope of this report is the archived prototype. Source
+                       I. I NTRODUCTION                               code establishes the programmed behavior, photographs estab-
+                                                                      lish visible construction, and screenshots establish captured
+A. Problem Statement and Motivation                                   interface states. None of these alone establishes calibrated
+   Intravenous (IV) fluid delivery requires attention to the          volume delivery or safe therapeutic operation. Measured accu-
+fluid source, the administration mechanism, and the patient’s         racy, actual response time, and energy efficiency are therefore
+condition. In a manually supervised arrangement, a caregiver          identified as evaluation tasks rather than assigned numerical
+checks the container, adjusts the tubing or clamp, and sepa-          values.
+rately observes vital signs. These activities motivate a common
+interface that reports fluid status and sensor availability while     C. Literature Review
+allowing supervised intervention. Research on remote infusion            Lee, Yoon, and Kim [1] combined an optical sensor with
+monitoring has explored optical drop detection and container-         a load cell for remote IV monitoring. Their system reports
+weight measurement to support this process [1].                       remaining fluid, infusion rate, and expected completion time
+   The project presentation identifies manual IV and syringe          to caregivers, and the study examines motion-related measure-
+operation, limited continuous monitoring, and repetitive care-        ment limitations. This provides a useful comparison because
+giver tasks as the motivating problems. It also identifies            MediSmart also uses container-weight information, but its
+affordability and suitability for resource-constrained hospitals      archived implementation does not combine that reading with
+in Bangladesh as design goals. These motivations describe the         an optical drop counter or compute an infusion-rate estimate.
+intended application; the provided materials do not contain a            Contardi, Morikawa, Brunelli, and Thomaz [2] demon-
+hospital deployment, stakeholder interview study, or measured         strated a MAX30102 optical module connected to an ESP32
+reduction in caregiver workload.                                      for remote heart-rate and oxygen-saturation monitoring. Their
+   MediSmart brings an IV stopping mechanism, a syringe               work supports the feasibility of integrating optical biosensing
+mechanism, physiological sensing, and remote visualization            with a networked microcontroller. MediSmart extends that
+onto a shared ESP32 platform. The engineering problem is              integration into a prototype that also includes ECG acquisition,
+fluid estimation, and servo mechanisms; this difference does       shared variables are not protected by a snapshot or mutex. The
+not demonstrate superior physiological measurement accuracy.       design is a single-device implementation: the database paths
+   Kok and colleagues [3] developed a cloud-connected infu-        do not include a patient or device identifier.
+sion platform with remote supervision through Blynk. Their            2) Optical Pulse and Oxygen Estimation: The MAX30102
+design includes a stepper-driven pumping mechanism and             contains red/infrared optical sensing and a digital interface [4].
+infusion-related sensing, illustrating the importance of ob-       The firmware uses I2 C address 0x57 at 100 kHz and reads
+serving delivery as well as commanding a motor. MediSmart          six FIFO bytes per loop to reconstruct the two 18-bit values.
+instead uses Firebase and three PWM servo channels in the          An infrared value below 20000 clears the reported pulse and
+archived firmware. Its saline threshold and syringe motion         oxygen values, representing no detected usable finger signal.
+sequence are simpler than a calibrated infusion-rate controller.      For a valid optical input, a running DC estimate for channel
+   Table I summarizes the features relevant to this project. The   sample x[n] is
+comparison concerns the cited implementations and the sup-         D[n] = 0.95D[n − 1] + 0.05x[n],          A[n] = x[n] − D[n].
+plied MediSmart archive; it is not a performance benchmark.                                                                     (1)
+                                                                   The pulse routine detects an infrared AC threshold crossing
+D. Project Contributions and Distinguishing Features               followed by a decreasing sample. It imposes an interval greater
+                                                                   than 400 ms between accepted beat events and calculates
+   The project’s contribution is the integration of fluid esti-
+mation, physiological acquisition, local actuation, and sev-                                            60000
+                                                                                      BPMcandidate =           .                (2)
+eral caregiver-facing views. The doctor interface changes the                                            ∆tms
+remaining-volume rules and displays device-reported valve          Only candidates strictly between 50 and 130 BPM enter an
+and syringe states. The patient and family interfaces provide      eight-value buffer. Once at least five values exist, the routine
+simpler pulse/oxygen displays, with an on-page family alert for    sorts them, removes the smallest and largest, and averages the
+programmed conditions. A separate network task exchanges           remainder. The displayed estimate applies additional smooth-
+settings while local firmware evaluates the actuator conditions.   ing with coefficients 0.97 and 0.03. These choices reduce
+   These are distinguishing features of this prototype relative    visible variation but delay changes and exclude pulse rates
+to the selected examples, rather than claims that no previous      outside the acceptance range.
+project has implemented them. The archived design also                The oxygen estimate uses peak-to-peak AC amplitudes and
+differs from the early presentation: load-cell sensing, AD8232     DC levels:
+acquisition, and an oxygen-designated servo appear in the                      Ared,pp /Dred
+code and wiring; a stepper driver sequence, LCD driver, IR                R=                 ,    Scandidate = 110 − 25R. (3)
+                                                                               AIR,pp /DIR
+drop-counting routine, and ESP-NOW link do not. Subsequent
+                                                                   The candidate is restricted to 80–100%, then smoothed as
+chapters describe the implementation that can be traced to the
+                                                                   S[n] = 0.9S[n − 1] + 0.1Scandidate after initialization. These
+supplied evidence.
+                                                                   are the implemented algorithm and output limits, not verified
+                   II. P ROPOSED M ETHOD                           oxygen-saturation accuracy. The archive supplies no reference-
+A. Block Diagram of the Overall System                             device comparison or calibration record.
+                                                                      3) ECG Acquisition: The AD8232 is a single-lead signal-
+  Fig. 1 presents the implemented signal and control paths.        conditioning front end designed to interface with an ADC [5].
+Three sensing inputs feed the ESP32: the MAX30102 supplies         Its output feeds ESP32 ADC1 channel 6 on GPIO 34; LO+
+red/infrared optical samples over I2 C, the AD8232 supplies an     and LO− feed GPIO 25 and GPIO 26. If either lead-off input
+analog ECG signal and lead-off indications, and the HX711          is high, the firmware sets the ECG value to zero. Otherwise it
+supplies digitized load-cell data. The controller processes the    reads one raw ADC sample. The web chart receives only the
+samples and drives three servo channels and a buzzer. Wi-Fi        latest cloud-published sample and therefore does not reproduce
+connects a separate firmware task to Firebase, which stores        the complete locally acquired waveform.
+current telemetry and remote settings.                                4) Load-Cell Fluid Estimate: The HX711 serial interface is
+B. Function of Each Subsystem                                      read through data and clock GPIOs. After the firmware’s 24-
+                                                                   bit conversion, a nonzero transformed count W [n] is mapped
+   1) Controller and Local Scheduling: The ESP32 is config-        to the nonnegative fluid proxy
+ured as a Wi-Fi station. Its main loop reads sensors, calculates                              (︃                    )︃
+conditions, updates servo angles, and prints diagnostics. A                                        W [n] − 8388608
+                                                                               Vraw [n] = max 0,                       .      (4)
+FreeRTOS task performs Firebase HTTP requests separately.                                                1000
+The main loop ends with a 20 ms delay, while the network           When the stored estimate is zero, the new value is adopted
+task ends with a 2000 ms delay; actual periods also include        directly; otherwise the update is
+computation, sensor waiting, request duration, and scheduling.
+                                                                                V [n] = 0.85V [n − 1] + 0.15Vraw [n].            (5)
+   The network task obtains /settings.json with GET
+and updates /vitals.json with PATCH. This separates                The firmware and dashboard express V in mL. A physical
+the slower network exchanges from the actuator sequence, but       weight-to-volume measurement also requires a documented
+                                                                    TABLE I
+                                              F EATURE C OMPARISON WITH S ELECTED P UBLISHED W ORK
+
+Work                            Main sensing and mechanism               Communication and interface               Relation to MediSmart
+Lee, Yoon, and Kim [1]          Optical drop detection and               Remote IV information and                 Provides a multisensor
+                                load-cell monitoring                     notifications                             comparison; MediSmart’s current
+                                                                                                                   fluid estimate uses
+                                                                                                                   HX711/load-cell input only.
+Contardi and                    MAX30102 pulse and                       Remote physiological                      Shares the optical
+colleagues [2]                  oxygen-saturation sensing with           visualization                             sensing/controller combination;
+                                ESP32                                                                              MediSmart also incorporates fluid
+                                                                                                                   and actuator functions.
+Kok and colleagues [3]          Stepper-driven infusion and              Blynk web/mobile supervision              Provides an alternative cloud and
+                                delivery-related sensors                                                           pumping architecture; MediSmart
+                                                                                                                   implements servo motion and
+                                                                                                                   Firebase settings.
+MediSmart archive               MAX30102, AD8232, HX711;                 Shared Firebase telemetry and             Integrates the functions in one
+                                saline, syringe, and                     doctor/patient/family views               educational prototype; calibrated
+                                oxygen-designated servos                                                           delivery and physiological
+                                                                                                                   accuracy are unverified.
+
+
+    MAX30102 optical sensor                                                                                           Saline servo mechanism
+        Finger: red and                                                                                                  Gradually open or
+       infrared samples                      I2C                                                     PWM                 clamp the IV tube
+
+
+                                                 ESP32 controller
+                                            Sensor filtering and estimates
+    AD8232 ECG front end         ADC + GPIO                                                          PWM             Syringe servo mechanism
+                                                 Threshold checks
+ Analog signal and lead-off pins                                                                                    Forward stroke, then return
+                                                  and servo states
+                                             Local loop + network task
+
+                                        Data + clock                                            PWM / GPIO               Oxygen-designated
+        Load cell + HX711                                                                                                 servo + buzzer
+        Container-load data                     Wi-Fi / HTTPS REST
+                                                Telemetry and settings                                                    Respond to low
+         for fluid estimate                                                                                              estimated oxygen
+        Power subsystem
+    External 5 V actuator rail                              Firebase Realtime Database
+     Board/sensor supplies;                                     /vitals: current
+        common ground                                             data and states
+                                                            /settings: control rules
+                                                                             Database listeners / writes
+                                                                 Web interfaces
+                                                    Doctor: telemetry and threshold controls
+                                                   Patient / family: pulse and oxygen display
+
+Fig. 1. Overall implementation architecture reconstructed from the firmware, website, and supplied wiring diagrams. Power connections are summarized; the
+separate wiring diagrams show the detailed rails. Servo arrows indicate commands, without measured flow or position feedback.
+
+
+
+tare, calibration factor, mounting condition, and fluid-density               C. Actuator Rules and Motion Sequences
+assumption. Since these are absent, this report describes V as                  Three LEDC channels share a 50 Hz, 13-bit PWM timer.
+a remaining-fluid estimate or proxy rather than a calibrated                  The ideal angle-to-pulse relation for servo angle θ is
+volume measurement. A timeout retains the previous estimate
+without an explicit invalid-data flag.                                                               2000θ
+                                                                                      tp (θ) = 500 +          (µs),      0 ≤ θ ≤ 180.   (6)
+                                                                                                      180
+                                                                              The nominal frame duration is 20000 µs. The implementa-
+                                                                              tion uses integer division for the pulse-width term and then
+                                                                              quantizes duty to the timer’s resolution. Commanded angle is
+the software state; no external position sensor establishes the                                 TABLE II
+mechanical angle.                                                                 I MPLEMENTED F IREBASE DATA C ONTRACT
+   1) Saline Stopping Rule: For configured threshold Ts , the
+                                                                     Path            Fields                    Purpose
+clamp condition is
+                                                                     /vitals         bpm, spo2, ecg,           Latest processed estimates
+                  Cs = (Ts > 0) ∧ (V < Ts ).                  (7)                    current_ml                and raw ECG sample.
+                                                                     /vitals         saline_status,            Software-reported servo
+When true, the saline angle increases by 2◦ per loop to-                             dose_status               sequence states.
+                                                                     /settings       saline_stop_ml,           Remaining-volume control
+ward 180◦ and the reported state progresses from Closing to                          dose_trigger_ml           thresholds.
+Stopped. Otherwise the angle decreases by 2◦ toward zero and         /settings       dose_time                 Firmware-only
+the state progresses from Opening to Open. Equality does not                                                   hour/minute trigger; no
+                                                                                                               corresponding web control.
+initiate closing. This is a remaining-volume stop rule; it does      /users/         email, role               Registration record used
+not command a continuous infusion rate in mL/h.                      <uid>                                     for login routing.
+   2) Syringe Sequence: For threshold Td , the volume-based
+condition is (Td > 0) ∧ (V < Td ). The firmware also
+checks whether the current local hour and minute match               oxygen warning and interprets an ECG value of zero as lead
+dose_time, if such a setting has been parsed. Either condi-          disconnection. These inconsistent prototype display thresholds
+tion starts a cycle when no cycle is active. The servo advances      are documented rather than reconciled by assuming a common
+by 1◦ per loop toward 180◦ , reports Pushing, then requests a        medical policy.
+cloud reset of dose_trigger_ml and returns by 2◦ per
+loop toward zero. The final state is Standby.                                  III. I MPLEMENTED H ARDWARE S YSTEM
+   No programmed syringe volume, plunger-position measure-           A. Hardware Equipment and Model Identification
+ment, or flow calibration is supplied. The web reset button             Table III records the hardware supported by the firmware,
+clears a trigger value and does not implement an immediate           wiring sketches, and photographs. Exact model information
+abort of an active cycle. The time condition has no once-per-        is retained where documented, and ambiguous identities are
+event latch, so additional cycles can start while the matching       marked for confirmation. The photographed load cell has
+minute remains active. These limitations are considered in           a readable 5 kg label, while the ESP32 development-board
+Section V.                                                           variant and power-source rating are not established by readable
+   3) Oxygen-Designated Servo and Buzzer: The local condi-           labels.
+tion is 0 < S < 85%. When true, the firmware sets the buzzer            The presentation additionally lists an IR drop sensor, stepper
+GPIO high and advances the oxygen-designated servo by 2◦             motor, lead screw, LCD, rechargeable battery, and following
+per loop. Otherwise it silences the buzzer and returns the servo     sensor/camera. The supplied medical firmware contains no
+toward zero. The 85% value is a project constant and is not          corresponding drop-counting, stepper, LCD, or following-
+presented as a clinically approved treatment threshold. The          control routines. These items are not presented as verified
+photographs include a mask and tubing, but no oxygen-flow            functioning modules in the implementation inventory.
+sensor or measured delivery result establishes the mechanism’s
+therapeutic effect.                                                  B. Electrical Interfacing and Pin Assignment
+                                                                        Table IV gives the code/wiring pin assignment. The
+D. Cloud Data and Web Interfaces                                     MAX30102 communicates through SDA and SCL; the
+   Table II lists the active cloud fields. The doctor page listens   AD8232 provides an ADC input and two digital status inputs;
+for telemetry and settings changes, plots a rolling buffer of 50     and the HX711 uses a clock/data interface. The three servo
+received ECG values, and writes two fluid thresholds. Its open       signals use dedicated LEDC channels, while the buzzer is
+button sets Ts = 0; its close button sets Ts = 9999, making          switched through a GPIO output.
+the clamp condition true when the estimated volume is below             The supplied sensor sketch shows a 3.3 V rail and a
+that sentinel. The reset button sets Td = 0.                         common ground. The actuator sketch shows an external 5 V
+   Registration uses Firebase email/password authentication          rail with servo and ESP32 grounds joined; it does not establish
+and stores a selected patient, family, or doctor role. Login         the supply’s available current or transient performance. The
+reads this role to select a page. Patient and family pages           diagrams also omit detailed load-cell bridge wiring, protec-
+include a signed-in check; the archived doctor page lacks an         tive components, and module-specific regulator arrangements.
+authentication guard and retains configuration placeholders.         Module voltages, I2 C electrical behavior, and power capacity
+Therefore the report distinguishes role-based page routing           therefore require verification against the actual boards and
+from verified role-based authorization, which requires server-       device documentation [4], [5], [7].
+enforced access rules [6].
+   The patient view labels a zero reading as Sensor Ready            C. Software Environment
+/ Place Finger. The family view displays an alert for BPM               The embedded program is C, with ESP-IDF as the frame-
+above 120, positive BPM below 50, or positive SpO2 below             work and PlatformIO as the project environment. The con-
+92%. The doctor view uses positive SpO2 below 85% for its            figuration specifies the espressif32 platform, esp32dev
+                                                                  TABLE III
+                                          H ARDWARE I NVENTORY AND E VIDENCE OF C OMPONENT I DENTITY
+
+Equipment                           Model / specification                Role and evidence
+Microcontroller development         ESP32; PlatformIO target             Main acquisition, actuation, Wi-Fi and task scheduling. Exact
+board                               esp32dev                             board/module variant requires confirmation.
+Optical biosensor module            MAX30102                             Red/infrared acquisition for pulse and SpO2 estimates; named in
+                                                                         code, slides, and sensor wiring.
+Single-lead ECG front end           AD8232                               Analog signal conditioning and lead-off outputs; named in the sensor
+                                                                         wiring, with matching firmware pins.
+Load-cell ADC/interface             HX711                                Reads the container-load sensor; identified by firmware and wiring.
+Load cell and hook                  5 kg capacity label; exact part      Upper stand assembly visible in photograph 4. Mechanical mounting
+                                    number unspecified                   converts supported load to a sensing input.
+Saline clamp servo                  SG90 in wiring; MG996R in            PWM output on GPIO 5. Physical model must be confirmed because
+                                    code comments                        the two sources disagree.
+Syringe and                         MG996R in wiring and code            PWM outputs on GPIO 18 and GPIO 16. Actual torque/travel and
+oxygen-designated servos            comments                             delivered quantities were not measured in supplied records.
+Local alarm                         Active buzzer; exact part            GPIO 4 output, named in the actuator diagram and firmware.
+                                    number unspecified
+Syringe mechanism                   Syringe, handmade guide, rack        Photographed mechanism; syringe capacity and travel-to-volume
+                                    and gear                             calibration are unspecified.
+Fluid/oxygen-related assembly       Tubing, mask, and mounted            Visible in photographs 2, 3, and 6; exact regulator/container ratings
+                                    mechanical components                and output flow are unspecified.
+Structure and power                 Pole, caster base, enclosure,        Provides physical integration. Battery chemistry, capacity, regulator
+                                    breadboards, wiring; external        identity, and current budget require confirmation.
+                                    5 V actuator rail in diagram
+Additional photographed             Motor-driver-like board,             Visible in photographs but not operated by the supplied ESP32 source.
+hardware                            secondary controller,                Exact models and any separate mobility firmware are unspecified.
+                                    ultrasonic-style modules
+
+
+
+                                TABLE IV                                   actual board capacity must be checked and both settings made
+                          ESP32 P IN A SSIGNMENT                           consistent before reproducing a firmware build. There are no
+                                                                           custom tests in the supplied test directory, and no firmware
+Signal                             GPIO            Interface
+                                                                           build or hardware experiment is claimed as part of this report-
+MAX30102 SDA / SCL                 21 / 22         I2 C, 100 kHz           generation process.
+AD8232 OUT                         34              ADC1, channel 6
+AD8232 LO+ / LO−                   25 / 26         Digital inputs
+HX711 DT / SCK                     19 / 23         Serial data / clock
+Saline servo                       5               LEDC channel 1          D. Figures of the Implemented Hardware System
+Syringe servo                      18              LEDC channel 2
+Oxygen-designated servo            16              LEDC channel 0            Fig. 2 labels the overall structure and two important me-
+Active buzzer                      4               Digital output          chanical assemblies. The upper load-cell/hook supports load
+                                                                           sensing, the tubing and mask identify the respiratory-related
+                                                                           assembly, and the lower enclosure contains the wiring and
+board, DIO flash mode, and a 115200-baud serial monitor.                   controller area. The syringe close-up shows a rack-and-gear
+CMake requires version 3.16 or later and registers the sources             construction rather than a verified lead-screw drive. Fig. 3
+under src. The saved generated SDK configuration identifies                identifies the base electronics and electrode connections.
+ESP-IDF 6.1.0, but the PlatformIO platform version is not
+pinned, so a fresh installation is not guaranteed to reproduce
+                                                                                                      IV. R ESULTS
+that toolchain exactly.
+   The firmware uses ESP-IDF GPIO, LEDC, I2 C, ADC, Wi-                    A. Available Evidence and Evaluation Method
+Fi, HTTP-client, SNTP, and FreeRTOS facilities. The frontend
+consists of static HTML, CSS, and JavaScript pages served by                  The available evidence comprises the assembled-system
+Firebase Hosting. Application pages use Firebase SDK 8.10.1;               photographs, the implementation source, and saved web-
+the doctor interface also uses Bootstrap 5.3.0 and a Chart.js              site/database screenshots. The slides provide objectives and
+CDN dependency. The default hosting welcome page uses                      feature descriptions, but no tabulated trials, reference mea-
+a different Firebase SDK version and is separate from the                  surements, instrument readings, timestamps, or experimental
+application login page.                                                    logs. The results below therefore report directly visible states
+   A configuration inconsistency affects reproducibility:                  and source-derived behavior separately. Numerical accuracy,
+platformio.ini specifies a 4 MB upload flash size,                         dose error, and actual latency cannot be calculated from the
+whereas the saved SDK configuration selects 2 MB. The                      archive.
+                                    1
+
+
+
+
+                                     2                                                                                                                 3
+                                                                                             1
+                                                                                                                        1
+
+
+
+
+                                     3                                                                                                             2
+                                                                                                 2
+
+
+
+
+       4
+                                                                                                     3
+
+
+                                     5
+
+
+  (a) Overall prototype. 1: load-cell/hook; 2:        (b) Syringe construction. 1: rack and gear; 2:            (c) Load sensing mount. 1: load cell labeled
+mask/tubing; 3: mounted actuation assembly; 4:          syringe/guide; 3: visible servo attachment.             5 kg; 2: hanging hook; 3: wiring and support
+     electronics enclosure; 5: caster base.            Photographs do not quantify delivered dose.                               electronics.
+Fig. 2. Annotated photographs supplied with the project: overall view (photograph 6), syringe assembly (photograph 3), and load-cell mount (photograph 4).
+Numbered callouts identify visible parts without assigning unreadable model labels.
+
+
+
+B. Captured Dashboard and Database State                                                                          TABLE V
+                                                                                                 VALUES V ISIBLE IN THE S UPPLIED C APTURES
+   Fig. 4 shows the doctor interface with a remaining-fluid
+estimate of 324.1 mL, a saline stop setting of 320 mL, an Open                Quantity                      Visible value       Supported interpretation
+valve state, and a Standby syringe state. The supplied Firebase               Fluid estimate                324.1 mL            Displayed estimate;
+console capture shows the same current_ml, threshold, and                                                                       calibration unverified.
+status values. This agreement supports consistency between                    Saline stop setting           320 mL              Positive remaining-volume
+                                                                                                                                cutoff.
+the captured dashboard and stored data at that observation; it                Saline state                  Open                Consistent with estimate
+does not establish the correctness of the load-cell calibration                                                                 above cutoff.
+or prove a complete actuation sequence.                                       Dose trigger                  0                   Volume-trigger rule disabled
+                                                                                                                                in console snapshot.
+   The state also agrees with the code’s strict remaining-                    Syringe state                 Standby             No stroke shown at capture
+volume rule. Since 324.1 < 320 is false, (7) does not request                                                                   time.
+closure. This interpretation is important because the threshold               Pulse / oxygen                0/0                 Unavailable readings; no
+                                                                                                                                physiological accuracy
+is a remaining-volume cutoff, rather than a target volume                                                                       evidence.
+already delivered. Screenshots 6 and 7 duplicate screenshots 1                ECG                           0                   Doctor view shows
+and 2 respectively and are not counted as additional trials.                                                                    disconnection warning and
+                                                                                                                                zero plot.
+   Table V records the observation without assigning un-
+measured performance values. The additional saline_ml
+and saline_threshold entries visible in the console
+screenshot are not read or written by the current active dash-                so the lack of a family alarm in this capture is consistent
+board/firmware paths, and are not treated as the implemented                  with its code. It does not demonstrate that an abnormal valid
+data contract.                                                                measurement was detected or that a notification reached a
+                                                                              caregiver.
+C. Patient and Family Interface Outputs                                          The account-creation screenshot contains the patient, fam-
+   Fig. 5 shows the patient dashboard labeling the zero pulse                 ily/guardian, and medical-doctor role choices. Source inspec-
+and oxygen values as Sensor Ready / Place Finger. Fig. 6                      tion confirms the intended authentication and routing se-
+shows the corresponding family view. The family implemen-                     quence. Successful registration of every role, enforcement of
+tation excludes zero values from its positive-low-reading tests,              doctor privileges, and protected access to telemetry are not
+                                                                               for a 180◦ saline/oxygen command, 180 × 20 ms = 3.6 s
+                                                                               for the syringe’s forward stroke, and about 1.8 s for its
+                                                                               return. Sensor access and transition iterations add time, and
+                                                                               mechanical motion may differ from the command sequence.
+                                                                               These values are calculations from the implementation, not
+                                                                               measured response times.
+                                                                                  The cloud task delays two seconds after completing its
+                                                                               requests, so it offers periodic latest-value publication with
+                                                                               additional HTTP overhead. The doctor plot appends one ECG
+                                                                               value per database callback rather than a timestamped wave-
+                                                                               form packet. Consequently, the captured flat plot and software
+                                                                               timing do not establish ECG waveform fidelity. No current
+                                                                               measurements, battery-capacity specification, deployment up-
+                                                             1
+                                                                               time, or itemized purchase costs are provided, so energy
+                                                                               efficiency, battery life, and total cost remain unquantified.
+                                                                               F. Experimental Validation Required for Performance Claims
+                                                                                  Table VII specifies the missing measurements and an ap-
+                                                                               propriate way to obtain them. These procedures are pro-
+                                                         2
+              3
+                                                                               posed future evaluation, not completed experiments. Fluid and
+                                                                               syringe trials should use a laboratory collection setup; any
+                                                                               human physiological study requires the relevant supervision
+                                                                               and consent arrangements.
+                                                                                  For N paired reference and estimated volumes, a repro-
+Fig. 3. Base electronics in photograph 1. 1: controller-board area; 2:
+                                                                               ducible accuracy summary would include
+breadboard wiring; 3: electrode pads/cables. Wiring obscures some labels, so                              N
+exact component identities are taken from the source/wiring inventory rather                          1 ∑︂
+than inferred from this view.
+                                                                                           MAEV =           |V̂i − Viref |   (mL).          (8)
+                                                                                                      N i=1
+                                                                               An end-to-end control measurement would separately record
+established by that single screenshot.                                         database write time, device receipt time, and physical actuator
+D. Source-Derived Output Conditions                                            response. No values for these metrics are inserted because the
+   The prototype’s key output conditions are explicit in the                   required paired records and timestamps are absent.
+firmware. The following excerpt is taken from the control-                                             V. D ISCUSSION
+condition portion of main.c; it contains no credentials:
+                                                                               A. Limitations and Examples of Unexpected Operation
+      bool saline_stop_active =
+        (saline_stop_ml > 0 &&                                                    1) Calibration and Unobserved Delivery: The current fluid
+         current_ml < saline_stop_ml);                                         conversion has a fixed offset/divisor and no supplied cali-
+      bool weight_trigger =
+        (dose_trigger_ml > 0 &&                                                bration, tare, or density record. Moving the stand, changing
+         current_ml < dose_trigger_ml);                                        the supported container, or changing mechanical loading can
+      bool o2_emergency =                                                      therefore produce an unreliable remaining-volume estimate.
+        (smooth_spo2 > 0 &&
+         smooth_spo2 < OXYGEN_DANGER_LEVEL);                                   The syringe and oxygen-designated mechanisms receive angle
+When o2_emergency is true, the output branch calls                             commands without delivered-volume, pressure, flow, or exter-
+gpio_set_level(BUZZER_PIN, 1) and advances the                                 nal position feedback. A displayed Stopped or Pushed state
+oxygen-designated servo angle. The code therefore estab-                       represents the firmware’s sequence state and may not match
+lishes the command path from an estimated sensor value                         physical delivery if a linkage slips or a servo stalls.
+to a GPIO/PWM output. The supplied photographs do not                             2) Repeated Dose Scheduling and Reset Semantics: A
+capture the buzzer energized or provide measured oxygen flow,                  configured time trigger remains true throughout its matching
+so physical alarm activation and treatment delivery are not                    minute. Once the syringe completes its forward/return cycle,
+reported as observed results.                                                  the same condition can start another cycle; no executed-
+   Table VI presents illustrative boundary cases derived from                  event identifier or date latch prevents repetition. Clearing the
+these conditions. These are analytic examples, not newly                       browser’s dose threshold also does not abort an active cycle
+conducted bench tests or recorded patient data.                                or clear a previously parsed time schedule. These are concrete
+                                                                               examples in which user expectations and the programmed
+E. Timing and Efficiency That Can Be Inferred                                  behavior may differ, and require an explicit once-per-event
+  The 20 ms programmed loop delay and angular increments                       schedule and cancel/acknowledgment mechanism before a
+yield nominal delay-only travel times: 90 × 20 ms = 1.8 s                      dosing claim is justified.
+Fig. 4. Supplied doctor dashboard capture: estimated fluid 324.1 mL, configured stop threshold 320 mL, valve Open, syringe Standby, and unavailable
+physiological values. The zero ECG trace and disconnection banner document an interface state, without establishing a valid measured rhythm.
+
+                                                                    TABLE VI
+                                     I LLUSTRATIVE I NPUT- TO -O UTPUT C ASES D ERIVED FROM THE F IRMWARE
+
+Case                              Assumed inputs                             Programmed outcome                  Evidence status
+Captured saline state             V = 324.1 mL, Ts = 320 mL                  Closing condition false; target     Values/status visible in saved
+                                                                             moves toward open.                  captures and consistent with
+                                                                                                                 code.
+Saline threshold equality         V = 320 mL, Ts = 320 mL                    Strict comparison false; does       Boundary example from source
+                                                                             not begin closing.                  only.
+Below saline cutoff               V = 319 mL, Ts = 320 mL                    Servo moves toward clamp;           Source-derived case; no
+                                                                             Closing then Stopped if             matching observed sequence
+                                                                             condition persists.                 supplied.
+Volume-triggered syringe          V = 135 mL, Td = 136 mL; cycle             Begins fixed forward/return         Source-derived case; delivered
+                                  inactive                                   angle sequence.                     volume unmeasured.
+Low estimated oxygen              S = 84% with usable optical input          Buzzer GPIO high;                   Source-derived case;
+                                                                             oxygen-designated servo             alarm/flow not experimentally
+                                                                             advances.                           documented.
+Unavailable optical input         Infrared count below 20000                 Pulse and oxygen estimates          Source branch; zero outputs
+                                                                             zero; positive-low-oxygen           are visible, but raw optical
+                                                                             condition false.                    input was not recorded.
+ECG lead off                      LO+ or LO− high                            ECG value forced to zero;           Source branch; warning visible,
+                                                                             doctor page shows warning.          input-pin state unrecorded.
+
+
+
+   3) Signal Availability and Alarm Meaning: The pulse                        The family view’s low-pulse alarm requires a positive BPM
+buffer accepts only values strictly between 50 and 130 BPM;                below 50, while the firmware normally admits pulse estimates
+a signal outside that range can be rejected while the display              above 50. That combination limits the usefulness of the family
+retains prior buffered values. SpO2 is restricted to 80–100%, so           low-pulse branch for this telemetry source. The patient view
+the interface cannot display lower estimates. Finger-signal loss           labels both low and high nonzero out-of-range pulse readings
+sets the oxygen estimate to zero and disables the positive-low-            as Elevated Heart Rate, and the doctor page equates ECG
+oxygen alarm condition, making sensor unavailability distinct              zero with disconnected leads. The interfaces need consistent
+from an emergency reading. These behaviors need explicit                   thresholds and separate validity fields to avoid misleading
+signal-validity/freshness reporting rather than interpretation as          labels.
+a complete physiological alarm system.
+                                                                     TABLE VII
+                                      P ROPOSED VALIDATION P LAN ; N O R ESULTS A RE C LAIMED FOR T HESE T ESTS
+
+Subsystem                           Proposed procedure                                           Record and evaluation metric
+Fluid estimate                      Tare the empty assembly; apply known                         Reference/estimated volume pairs; mean absolute
+                                    loads/volumes across its range; repeat static and            error, maximum error, repeatability, and mounting
+                                    disturbed trials.                                            conditions.
+Saline stopping                     Move the measured estimate through positive                  Input, GPIO/PWM time, physical closure time, state
+                                    thresholds, equality, and disabled settings; collect         sequence, and residual fluid movement.
+                                    remaining leakage after closure.
+Syringe mechanism                   Calibrate syringe geometry/travel using collected            Reference delivered volume, variation, backlash,
+                                    fluid; repeat full-stroke trials under specified loads.      stalls, and mechanical limits.
+Pulse / SpO2                        Compare synchronized valid outputs with an                   Paired readings, acquisition availability, agreement
+                                    appropriate reference instrument and document                errors, and recovery after signal loss.
+                                    signal/motion conditions.
+ECG channel                         Use a known simulator/reference signal and record            Sampling interval/jitter, signal agreement, lead-off
+                                    locally timestamped samples; exercise both lead-off          detection, and cloud information loss.
+                                    inputs.
+Cloud/control                       Timestamp a setting change, device receipt, output           Median/maximum end-to-end times, failed writes,
+                                    command, and browser status; repeat with                     stale-data behavior, and recovery.
+                                    delays/disconnection.
+Power and operation                 Measure voltage/current with Wi-Fi and servos                Peak current, energy per interval, operating
+                                    active, and observe resets/stalls on the actual supply.      duration, and brownout behavior.
+
+
+
+                                                                                  verification, and credentials are embedded in the source. The
+                                                                                  doctor page lacks an authentication guard, registration permits
+                                                                                  self-selection of the doctor role, and no database-rule file
+                                                                                  establishes the deployed authorization policy. Server-enforced
+                                                                                  access rules, authenticated device requests, certificate verifica-
+                                                                                  tion, command validation, and restricted telemetry access are
+                                                                                  required improvements [6], [8]. The shared database paths and
+                                                                                  flash-size/toolchain inconsistencies further limit reproducibil-
+                                                                                  ity and extension to multiple patients.
+Fig. 5. Patient dashboard capture displaying zero readings and sensor-ready
+messages. The image demonstrates the unavailable-reading presentation rather      B. Depth of Knowledge (P1)
+than validated physiological sensing.
+                                                                                     The project requires knowledge across microcontroller ar-
+                                                                                  chitecture, ADC and serial interfaces, PWM timing, filtering,
+                                                                                  FreeRTOS tasks, network protocols, cloud data, and elec-
+                                                                                  tromechanical design. It also requires understanding why a
+                                                                                  sensor output, a filtered estimate, a software actuator state,
+                                                                                  and an independently measured delivered quantity are different
+                                                                                  forms of evidence. These interacting domains support the
+                                                                                  depth-of-knowledge mapping for P1.
+                                                                                  C. Conflicting Requirements and Trade-offs (P2)
+Fig. 6. Family/guardian dashboard capture. No alert is visible for the captured      Affordability and a single-controller design favor inexpen-
+zero values, which the implemented alert condition excludes.                      sive sensors and servo mechanisms, while accurate delivery
+                                                                                  and robust monitoring require calibration, feedback, and ad-
+                                                                                  ditional fault detection. Strong smoothing improves display
+   4) Network, Security, and Reproducibility: Telemetry has                       stability but delays changes; separating cloud requests from
+no timestamp, sequence number, stale-data indication, or de-                      the local loop improves continuity but introduces shared-state
+vice identifier. During a connectivity failure, the browser may                   synchronization requirements. The implementation therefore
+retain old values and the firmware may continue with pre-                         trades hardware simplicity and development effort against
+vious settings. The HTTP code performs limited status/error                       measurement fidelity, response predictability, and verified con-
+validation and uses text searches instead of a structured JSON                    trol.
+parser; network and control tasks also share state without an
+atomic snapshot. These limitations affect command reliability                     D. Two Alternative Designs and Analysis (P3)
+and interpretation of the displayed values.                                          1) Alternative 1: Instrumented Stepper/Lead-Screw Sy-
+   The archived configuration explicitly disables TLS server                      ringe: A stepper motor, lead screw, homing switches, and
+plunger-position/force sensing would make commanded dis-                                         TABLE VIII
+placement more explicit than a fixed servo sweep. With a                          C OMPLEX E NGINEERING P ROBLEM M APPING
+measured syringe bore area A and plunger displacement ∆x,
+                                                                                     P1    P2     P3    P4     P5    P6     P7
+the nominal geometric delivery is ∆V = A∆x, but backlash,
+fluid compliance, and pressure still require collection-based                        ✓     ✓      ✓     ✓      ✓     —      ✓
+calibration. This alternative adds motor-driver, mechanical,        P1: depth of knowledge; P2: conflicting requirements; P3: depth of analysis;
+and sensing cost, yet offers a clearer route to volume/rate            P4: familiarity of issues; P5: extent of applicable codes; P6: extent of
+                                                                                          stakeholders; P7: interdependence.
+control and fault detection than the archived mechanism.
+   2) Alternative 2: Passive Monitor with Manual Infusion
+Control: A monitoring-only device could combine load-cell           intended users alone do not demonstrate stakeholder involve-
+and optical drop sensing, retain the physiological channels, and    ment.
+alert a caregiver without remotely actuating fluid delivery. This
+would reduce actuator complexity and associated command             H. Module Interdependence (P7)
+hazards, while still requiring reliable calibration and alarm          Sensor interfaces, local control, cloud synchronization, and
+evaluation. It would provide less automation and retain manual      browser views form recognizable modules, and the local loop
+response time, but could be a more focused first stage for          can continue while the network task is delayed. Nevertheless,
+validating sensing and caregiver usability. The optical/load-       remote controls depend on Wi-Fi/Firebase and a shared set-
+cell integration in prior work [1] provides a relevant design       tings schema, while browser status depends on device pub-
+precedent.                                                          lication and both tasks share mutable variables. The physical
+                                                                    sensors/actuators are coupled to firmware pins and calibration,
+E. Impact and Familiarity of Issues (P4)
+                                                                    so modular files and separate tasks provide partial separation
+   The intended application extends beyond routine computer-        rather than complete independence.
+science coursework into medical workflow, fluid mechanics,
+physiological measurement, and human interaction. The po-           I. Complex Engineering Problem Mapping
+tential benefit is a common view of fluid estimates and sensor         Table VIII marks the aspects discussed with evidence
+status that can support caregiver attention, particularly where     or design analysis. P5 represents the documented inter-
+equipment cost matters. That benefit remains an engineering         face/security/ethical considerations, not a certification claim.
+objective; there is no supplied evidence of improved clinical       P6 remains pending because consultation evidence is absent.
+outcomes or reduced staff workload, and those questions
+require domain expertise and evaluation with intended users.                                   VI. C ONCLUSION
+                                                                       MediSmart integrates an ESP32, optical and ECG sensing,
+F. Standards, Manuals, and Ethical Considerations (P5)              a load-cell fluid estimate, three servo-control channels, and a
+   Relevant references include device documentation, the NXP        local buzzer with Firebase-based doctor, patient, and family
+I2 C specification, and ESP-IDF/Firebase manuals, although          interfaces. The archived implementation provides remaining-
+the archive contains neither electrical/timing compliance mea-      volume threshold control and a syringe motion sequence, with
+surements nor a record of the manuals originally studied            a captured 324.1 mL dashboard estimate and an open-valve
+by the team [4]–[8]. The 100 kHz I2 C setting matches               state consistent with the configured 320 mL cutoff.
+Standard-mode, while disabled TLS verification departs from            Separate local and network tasks support continued con-
+authenticated server verification; use of a named protocol          trol processing during HTTP requests, but measured latency,
+alone therefore does not establish complete compliance. The         accuracy, dose delivery, cost, and power efficiency are not es-
+ACM code motivates honest performance claims, privacy,              tablished by the supplied evidence. Future development should
+and avoidance of harm [9], while FDA infusion guidance              prioritize fluid and syringe calibration, independently observed
+provides a comparator for hazard analysis, alarm behavior,          actuator/flow states, once-per-event scheduling, and explicit
+and evaluation [10], without establishing certification of this     signal-validity reporting. Timestamped waveform acquisition,
+prototype or compliance with local clinical requirements.           consistent alert policies, authenticated access, verified TLS,
+                                                                    and device-specific data paths would strengthen monitoring
+G. Stakeholders and Requirement Incorporation (P6)                  reliability and extend the architecture. Controlled bench eval-
+   The implemented views identify doctors, patients, and fam-       uation and documented stakeholder feedback should precede
+ily/guardians as intended stakeholders, and the slides also         any claim of clinical benefit; the project repository link is
+identify nursing workload as a motivation. Their represented        included in the references, while the demonstration-video link
+requirements differ: clinicians need telemetry and controllable     awaits completion [11], [12].
+thresholds, patients need a simple display, and families need
+accessible status and warnings. However, no interview notes,                                ACKNOWLEDGMENT
+stakeholder approvals, funding discussions, or usability-study         The authors thank their project supervisor, Arnab Bhat-
+results were supplied. P6 is therefore left unmarked until actual   tacharjee, for supervising this CSE 4326 project at United
+consultation and resulting design changes are documented;           International University.
+                               R EFERENCES                                            In src/main.c, replace the Wi-Fi settings with [LAB
+ [1] J.-K. Lee, K.-C. Yoon, and K. G. Kim, “Design of a remote moni-               SSID] and [LAB PASSWORD], and configure matching set-
+     toring system based on optical sensors to prevent medical accidents           tings/vitals endpoints for [LAB FIREBASE DATABASE URL].
+     during fluid treatment,” Applied Sciences, vol. 11, no. 21, Art. 10124,       Keep credential values out of submitted listings. Confirm the
+     2021, doi: 10.3390/app112110124. [Online]. Available: https://www.
+     mdpi.com/2076-3417/11/21/10124.                                               physical flash capacity: platformio.ini requests 4 MB,
+ [2] U. A. Contardi, M. Morikawa, B. Brunelli, and D. V. Thomaz,                   whereas sdkconfig.esp32dev selects 2 MB. Reconcile
+     “MAX30102 photometric biosensor coupled to ESP32-webserver ca-                the saved configuration and board settings before uploading.
+     pabilities for continuous point of care oxygen saturation and heartrate
+     monitoring,” Engineering Proceedings, vol. 16, no. 1, Art. 9, 2022,           The following commands run from the firmware project di-
+     doi: 10.3390/IECB2022-11114. [Online]. Available: https://www.mdpi.           rectory:
+     com/2673-4591/16/1/9.                                                              pio run -e esp32dev
+ [3] C. L. Kok, C. K. Ho, T. K. Lee, Z. Y. Loo, Y. Y. Koh, and J. P. Chai,              pio run -e esp32dev -t upload
+     “A novel and low-cost cloud-enabled IoT integration for sustainable
+     remote intravenous therapy management,” Electronics, vol. 13, no. 10,
+                                                                                        pio device monitor -b 115200
+     Art. 1801, 2024, doi: 10.3390/electronics13101801. [Online]. Available:       Select the correct serial port if automatic detection fails.
+     https://www.mdpi.com/2079-9292/13/10/1801.
+ [4] Analog Devices / Maxim Integrated, “MAX30102: High-sensitivity
+                                                                                   Inspect build/upload output and the serial dashboard; a suc-
+     pulse oximeter and heart-rate sensor for wearable health,” data               cessful compilation alone does not verify connected sensors
+     sheet, Rev. 1, Oct. 2018. [Online]. Available: https://www.analog.            or mechanisms.
+     com/media/en/technical-documentation/data-sheets/max30102.pdf. Ac-
+     cessed: Oct. 8, 2026.                                                         B. Cloud and Browser Configuration
+ [5] Analog Devices, “AD8232: Single-lead, heart rate monitor front end,”
+     data sheet, Rev. D. [Online]. Available: https://www.analog.com/media/           Use an isolated laboratory database. Configure Firebase
+     en/technical-documentation/data-sheets/ad8232.pdf. Accessed: Oct. 8,
+     2026.
+                                                                                   Realtime Database and email/password Authentication, then
+ [6] Google Firebase, “Understand Firebase Realtime Database Security              make the browser pages and firmware reference the same
+     Rules.” [Online]. Available: https://firebase.google.com/docs/database/       project. Replace the doctor page’s API-key, sender-ID, and
+     security. Accessed: Oct. 8, 2026.
+ [7] NXP Semiconductors, “I2 C-bus specification and user manual,”
+                                                                                   application-ID placeholders with that project’s web configura-
+     UM10204, Rev. 7.0, Oct. 1, 2021. [Online]. Available: https://www.nxp.        tion. The supplied firebase.json specifies static content
+     com/docs/en/user-guide/UM10204.pdf.                                           in medismart/public/; it supplies no database rules.
+ [8] Espressif Systems, “ESP HTTP Client,” ESP-IDF Programming Guide.
+     [Online]. Available: https://docs.espressif.com/projects/esp-idf/en/stable/
+                                                                                      Before protected operation, implement server-side rules that
+     esp32/api-reference/protocols/esp http client.html. Accessed: Oct. 8,         restrict telemetry writes to the device and settings changes
+     2026.                                                                         to approved operators. Registration-selected roles must not
+ [9] Association for Computing Machinery, “ACM Code of Ethics and
+     Professional Conduct,” Jun. 22, 2018. [Online]. Available: https://www.
+                                                                                   authorize themselves. This requires corresponding firmware
+     acm.org/code-of-ethics.                                                       REST authentication and authentication/role checks in the
+[10] U.S. Food and Drug Administration, “Infusion pumps total product life         doctor page, which are absent from the supplied code. Re-
+     cycle: Guidance for industry and FDA staff,” Dec. 2, 2014. [Online].
+     Available: https://www.fda.gov/media/78369/download.
+                                                                                   store TLS server verification before protected deployment.
+[11] MediSmart project team, “Project source-code repository.” https://github.     Official rule and REST-authentication guidance is available at
+     com/khalidhasan7343/CSE 4326 -Microprosser---Micro-controller-                https://firebase.google.com/docs/database/security and https://
+     Project.
+[12] MediSmart project team, “Project demonstration video.” [ADD
+                                                                                   firebase.google.com/docs/database/rest/auth; secure operation
+     PROJECT YOUTUBE DEMONSTRATION URL].                                           cannot be achieved by changing browser navigation alone.
+                                                                                      Open login.html explicitly: the supplied root page
+                     A PPENDIX A                                                   remains Firebase’s welcome template. Register a laboratory
+   S ETUP AND L ABORATORY O PERATING I NSTRUCTIONS                                 account using the patient, family, or doctor selection, then
+   These instructions support supervised, nonclinical bench                        sign in. Login reads the saved role and redirects accordingly.
+demonstrations. Use water and mechanical mock loads; keep                          Patient/family pages display the shared vital stream; the doctor
+the infusion, syringe, and oxygen-designated mechanisms dis-                       page adds fluid estimates, statuses, settings, and a rolling
+connected from patients. Verify wiring, mechanical clearance,                      received-value ECG plot. These screens provide navigation
+supply capacity, and a means of removing actuator power                            rather than verified role-based authorization in the current
+before starting. The supplied photographs and wiring sketches                      implementation.
+do not establish clinical or electrical safety.
+                                                                                   C. Startup and Controls
+A. Firmware Preparation                                                               After power-up, verify Wi-Fi, database updates, sensor con-
+   Install VS Code with PlatformIO IDE and the board’s USB                         tact, and known-weight/volume calibration before interpreting
+serial driver, then open medismart/medismartVscode/                                readings. SNTP uses pool.ntp.org; the POSIX timezone
+as the PlatformIO project. Select environment esp32dev,                            UTC-6 represents Dhaka’s UTC+06:00. Confirm actual syn-
+board esp32dev, and framework espidf; the application is                           chronization separately because startup does not wait for valid
+ESP-IDF C. Regenerate the included editor/debug configura-                         time. Record local/remote observation times to identify stale
+tion because its absolute paths belong to another workstation.                     telemetry.
+Record the installed toolchain and framework versions when                            Sync Auto-Thresholds writes both remaining-volume thresh-
+reproducing the build.                                                             olds. A positive saline threshold closes its valve only when the
+estimate is strictly lower; equality does not trigger closure.                           A PPENDIX B
+A positive dose threshold starts a fixed syringe stroke under                 P ROJECT A RTIFACT T RACEABILITY
+the same comparison and does not specify delivered drug              The report uses the following supplied artifact groups;
+volume. Blank or invalid inputs become zero, disabling the        generated build files are not experimental evidence:
+corresponding volume condition.
+                                                                     • Project_slides/: the project presentation estab-
+   Open Valve writes a zero saline threshold. Close Valve
+                                                                        lishes its title, team, and concept; slide-only features
+writes 9999, producing a closure condition only while the
+                                                                        require implementation evidence.
+estimate is below that sentinel. Reset Dose Syringe clears the
+                                                                     • Project_images/1.jpeg through 6.jpeg: assem-
+dose-volume threshold; it does not cancel an active stroke or
+                                                                        bly, mechanisms, sensors, and electronics photographs.
+immediately retract the syringe. Check subsequent physical
+                                                                     • Website_images/web_1.jpeg                         through
+movement and telemetry because buttons provide no execution
+                                                                        web_7.jpeg: dashboard, registration, and database
+acknowledgement.
+                                                                        captures; two pairs repeat the same screens.
+   The firmware parses dose_time, but the supplied dash-
+                                                                     • medismart/: sensor and actuator wiring PNGs,
+board has no schedule editor. Its matching-minute condition
+                                                                        firebase.json, public/ browser sources, and
+can repeat cycles without an execution latch; leave scheduling
+                                                                        medismartVscode/ firmware/build configuration.
+disabled until this behavior is corrected and tested. Supervise
+                                                                     • CSE_4326_Project_Paper/:                  the        IEEE
+every bench cycle, record sensor-invalid/network-loss cases,
+                                                                        master,     chapter    files,  metadata     placeholders,
+and remove actuator power for a physical stop. Dashboard
+                                                                        IEEEtran.cls,          IEEEtran_HOWTO.pdf,            and
+zeros, software angles, and status labels do not prove physio-
+                                                                        REPORT_INSTRUCTIONS.md;                   materials/
+logical validity or delivered volume.
+                                                                        preserves the original template and source-review
+                                                                        notes.
+                                                                  The project repository link is provided in the references [11];
+                                                                  replace the remaining demonstration-video placeholder before
+                                                                  submission [12]. Keep original artifacts and distinguish pho-
+                                                                  tographed assembly, screenshot observations, source-derived
+                                                                  behavior, and future physical measurements throughout the
+                                                                  final report.
+

@@ -1,0 +1,108 @@
+=== ppt/slides/slide1.xml ===
+Autonomous Smart Dual Infusion & Patient Monitoring System Using ESP32
+An intelligent ESP32-based IV infusion, syringe pump, and patient monitoring solution — designed for reliable, affordable bedside automation.
+Team Members:
+ 1. Md. Turjo Hasnat – 0112410067                2. Md. Khalid Hasan – 0112410009
+ 3. Moieb Al Jawad – 0112410289                 4. Swarup Deb Nath – 0112230150
+5. Md Shakib - 0112410546
+
+=== ppt/slides/slide2.xml ===
+Problem Statement
+Manual IV/syringe control causing variability and delays
+Limited continuous patient monitoring — higher risk of adverse events
+Nurse workload elevated by repetitive, time-critical tasks
+Few low-cost, integrated smart solutions for resource-constrained hospitals
+Project Objectives
+Automatic IV flow control and syringe delivery
+Continuous heart-rate monitoring (MAX30102)
+Wireless real-time dashboard (ESP32 — ESP-NOW / Wi‑Fi)
+Emergency alerts, LCD status, reduced nurse workload
+
+=== ppt/slides/slide3.xml ===
+System Architecture
+Bidirectional Monitoring & Control
+Patient
+Source of vital data
+LCD Display + Buzzer
+Local alarms & status
+IV Infusion Module
+IR sensor + servo actuation
+ESP32 Controller
+Sensor fusion & control logic
+MAX30102 HR Sensor
+Heart-rate & SpO2 readings
+Syringe Pump Module
+Stepper + lead screw drive
+Bi-directional controls and wireless telemetry enable remote monitoring and local alarms. Diagram shows sensors feeding ESP32, actuation chain for infusion and syringe, and dashboard for caregivers.
+
+=== ppt/slides/slide4.xml ===
+Hardware Components
+ESP32 DevKit
+MAX30102 HR Sensor
+IR Drop Sensor
+Servo Motor (IV control)
+Stepper Motor + Lead Screw
+LCD Display & Buzzer
+Motor Driver & Power Supply
+Rechargeable Battery & Wheels
+Following Sensor / Camera
+
+=== ppt/slides/slide5.xml ===
+Working Principle
+Stepper Syringe
+Servo Adjust
+ESP32 Logic
+Drop Detect
+Heart-rate
+Continuous sensor feedback closes the control loop. ESP32 runs safety checks, triggers local alarms, and streams data for remote visualization and triage.
+
+=== ppt/slides/slide6.xml ===
+Key Features & Advantages
+Dual Infusion
+Simultaneous control of two IV lines for parallel therapies.
+Automatic IV & Syringe
+Precision servo and stepper-based actuation with closed-loop feedback.
+Heart Rate Monitoring
+Continuous, non-invasive measurement and trend alerts.
+ESP32 Wireless
+Low-latency ESP‑NOW / Wi‑Fi telemetry to web dashboard.
+Advantages
+Higher accuracy & consistent dosing
+Reduced human error & nurse workload
+Continuous patient monitoring and alarms
+Low-cost, portable — suited for Bangladesh hospitals
+Interface
+Local LCD + buzzer for bedside alerts; web dashboard for clinicians.
+
+=== ppt/slides/slide7.xml ===
+Conclusion & Future Scope
+We integrated smart IV infusion, an intelligent syringe pump, and heart-rate monitoring on an ESP32 platform to deliver an affordable bedside automation system that improves patient safety and reduces staff workload.
+Future Improvements
+AI-based health prediction and anomaly detection
+Additional sensors: BP, SpO2, ECG
+Mobile app and cloud connectivity for longitudinal records
+Contact
+Thank you!
+
+=== ppt/notesSlides/notesSlide1.xml ===
+1
+
+=== ppt/notesSlides/notesSlide2.xml ===
+2
+
+=== ppt/notesSlides/notesSlide3.xml ===
+3
+
+=== ppt/notesSlides/notesSlide4.xml ===
+4
+
+=== ppt/notesSlides/notesSlide5.xml ===
+5
+
+=== ppt/notesSlides/notesSlide6.xml ===
+6
+
+=== ppt/notesSlides/notesSlide7.xml ===
+7
+
+LINK ppt/slideLayouts/_rels/slideLayout2.xml.rels => https://gamma.app/?utm_source=made-with-gamma

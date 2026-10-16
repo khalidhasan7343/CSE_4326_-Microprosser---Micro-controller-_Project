@@ -1,0 +1,54 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs,tabularx,array}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={Autonomous Smart Dual Infusion and Patient Monitoring System Using ESP32},pdfauthor={MediSmart Project Team}}
+\urlstyle{same}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\placeholder}[1]{\textit{[#1]}}
+\input{project_metadata}
+\graphicspath{{../Project_images/}{../Website_images/}{../medismart/}}
+\hyphenation{MediSmart micro-controller data-base}
+
+\begin{document}
+\title{Autonomous Smart Dual Infusion and Patient Monitoring System Using ESP32}
+\author{\IEEEauthorblockN{Md. Turjo Hasnat, Md. Khalid Hasan, Moieb Al Jawad,\\
+Swarup Deb Nath, and Md Shakib}
+\IEEEauthorblockA{Student IDs: 0112410067, 0112410009, 0112410289, 0112230150, 0112410546\\
+\ProjectDepartment, \ProjectUniversity\\
+Course: CSE 4326 --- Microprocessor and Microcontroller Project\\
+Supervisor: \ProjectSupervisor}}
+\maketitle
+
+\begin{abstract}
+Manual supervision of intravenous fluid delivery and separate bedside monitoring can make it difficult to coordinate fluid status, patient observations, and caregiver intervention. This project addresses that integration problem through an educational embedded prototype called MediSmart.
+The implementation combines an ESP32 with a MAX30102 optical sensor, an AD8232 electrocardiogram front end, and an HX711 load-cell interface. Its firmware estimates pulse rate, oxygen saturation, and remaining fluid volume, drives saline, syringe, and oxygen-designated servo mechanisms, and controls a local buzzer. A Firebase Realtime Database connects device telemetry and control settings to doctor, patient, and family web interfaces.
+The supplied photographs, source code, and dashboard captures document the assembled platform and a consistent 324.1~mL displayed/database fluid estimate with an open-valve state above a 320~mL stopping threshold. Measurement accuracy, actual delivered dose, end-to-end latency, power efficiency, and clinical suitability remain unquantified because the supplied materials contain no calibrated experimental dataset.
+\end{abstract}
+\begin{IEEEkeywords}
+ESP32, intravenous monitoring, syringe actuation, MAX30102, AD8232, HX711, Firebase, embedded systems
+\end{IEEEkeywords}
+
+% Each file below is one chapter, rendered as an IEEE section to preserve
+% the supplied conference format. See REPORT_INSTRUCTIONS.md for the rubric.
+\input{chapters/01_introduction}
+\input{chapters/02_proposed_method}
+\input{chapters/03_implemented_hardware}
+\input{chapters/04_results}
+\input{chapters/05_discussion}
+\input{chapters/06_conclusion}
+
+\section*{Acknowledgment}
+\ProjectAcknowledgment
+
+\input{references}
+\input{chapters/07_appendices}
+\end{document}

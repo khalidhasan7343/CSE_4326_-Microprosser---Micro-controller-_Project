@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MediSmart | Sign In</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background: #ffffff; padding: 40px; border-radius: 12px; width: 340px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); text-align: center; }
+    h2 { color: #1e3c72; margin-bottom: 20px; }
+    input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #dcdfe6; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    button { width: 100%; padding: 12px; background: #1e88e5; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+    button:hover { background: #1565c0; }
+    p { font-size: 13px; color: #666; margin-top: 20px; }
+    a { color: #1e88e5; text-decoration: none; font-weight: 600; }
+    #status { font-weight: bold; margin-top: 15px; font-size: 14px; color: #d32f2f; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Welcome to MediSmart</h2>
+  <input type="email" id="email" placeholder="Email Address">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Log In</button>
+  <div id="status"></div>
+  <p>Need an account? <a href="register.html">Sign Up</a></p>
+</div>
+
+<script src="firebase-config.js"></script>
+<script>
+
+
+function login() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const status = document.getElementById("status");
+
+  if (!email || !password) {
+    status.innerText = "Please provide email and password.";
+    return;
+  }
+
+  status.style.color = "#1e88e5";
+  status.innerText = "Signing in...";
+
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then((credential) => {
+      const uid = credential.user.uid;
+      return firebase.database().ref("users/" + uid).once("value");
+    })
+    .then((snapshot) => {
+      const data = snapshot.val();
+      if (!data || !data.role) {
+        status.style.color = "#d32f2f";
+        status.innerText = "User role not assigned. Contact admin.";
+        firebase.auth().signOut();
+        return;
+      }
+
+      if (data.role === "doctor") {
+        window.location.href = "doctor.html";
+      } else if (data.role === "patient") {
+        window.location.href = "patient.html";
+      } else if (data.role === "family") {
+        window.location.href = "family.html";
+      } else {
+        status.style.color = "#d32f2f";
+        status.innerText = "Unknown role detected.";
+      }
+    })
+    .catch((error) => {
+      status.style.color = "#d32f2f";
+      status.innerText = error.message;
+    });
+}
+</script>
+
+</body>
+</html>

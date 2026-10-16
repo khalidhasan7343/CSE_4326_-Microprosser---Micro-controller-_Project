@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MediSmart | Family Guardian Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: #fdfbf7; }
+    header { background: #38a169; color: white; padding: 18px 25px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { margin: 0; font-size: 20px; }
+    .btn-logout { background: #e53e3e; color: #fff; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    .container { max-width: 850px; margin: 25px auto; padding: 0 20px; }
+    #alertBanner { display: none; background: #e53e3e; color: white; padding: 18px; border-radius: 8px; font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 25px; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+    .row { display: flex; gap: 20px; flex-wrap: wrap; }
+    .card { flex: 1; min-width: 240px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); text-align: center; }
+    .card h3 { margin: 0; color: #4a5568; font-size: 16px; }
+    .card .val { font-size: 44px; font-weight: bold; color: #2d3748; margin: 15px 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🛡️ Family & Guardian Wellness View</h1>
+  <button class="btn-logout" onclick="logout()">Log Out</button>
+</header>
+
+<div class="container">
+  <div id="alertBanner">🚨 ALERT: Patient vitals require attention!</div>
+
+  <div class="row">
+    <div class="card">
+      <h3>Patient Heart Rate</h3>
+      <div class="val" id="bpm">--</div>
+      <span style="color:#718096;">Beats Per Minute (BPM)</span>
+    </div>
+
+    <div class="card">
+      <h3>Patient Blood Oxygen</h3>
+      <div class="val" id="spo2">--</div>
+      <span style="color:#718096;">SpO₂ Percentage (%)</span>
+    </div>
+  </div>
+</div>
+
+<script src="firebase-config.js"></script>
+<script>
+
+
+firebase.auth().onAuthStateChanged(user => {
+  if (!user) window.location.href = "login.html";
+});
+
+function logout() {
+  firebase.auth().signOut().then(() => { window.location.href = "login.html"; });
+}
+
+firebase.database().ref("vitals").on("value", (snapshot) => {
+  const data = snapshot.val();
+  if (!data) return;
+
+  const bpm = data.bpm || 0;
+  const spo2 = data.spo2 || 0;
+
+  document.getElementById("bpm").innerText = bpm > 0 ? bpm.toFixed(0) : "0";
+  document.getElementById("spo2").innerText = spo2 > 0 ? spo2.toFixed(0) : "0";
+
+  const alertBanner = document.getElementById("alertBanner");
+  // Trigger alert if heart rate spikes above 120, falls below 50, or oxygen falls below 92%
+  if ((bpm > 120 || (bpm > 0 && bpm < 50)) || (spo2 > 0 && spo2 < 92)) {
+    alertBanner.style.display = "block";
+    alertBanner.innerText = `🚨 ALERT: Unusual Reading Detected! (BPM: ${bpm.toFixed(0)}, SpO2: ${spo2.toFixed(0)}%)`;
+  } else {
+    alertBanner.style.display = "none";
+  }
+});
+</script>
+
+</body>
+</html>

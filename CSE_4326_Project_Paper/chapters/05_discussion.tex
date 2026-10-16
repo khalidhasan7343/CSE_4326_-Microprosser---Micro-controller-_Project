@@ -1,0 +1,58 @@
+\section{Discussion}\label{sec:discussion}
+\subsection{Limitations and Examples of Unexpected Operation}
+\subsubsection{Calibration and Unobserved Delivery}
+The current fluid conversion has a fixed offset/divisor and no supplied calibration, tare, or density record. Moving the stand, changing the supported container, or changing mechanical loading can therefore produce an unreliable remaining-volume estimate. The syringe and oxygen-designated mechanisms receive angle commands without delivered-volume, pressure, flow, or external position feedback. A displayed \emph{Stopped} or \emph{Pushed} state represents the firmware's sequence state and may not match physical delivery if a linkage slips or a servo stalls.
+
+\subsubsection{Repeated Dose Scheduling and Reset Semantics}
+A configured time trigger remains true throughout its matching minute. Once the syringe completes its forward/return cycle, the same condition can start another cycle; no executed-event identifier or date latch prevents repetition. Clearing the browser's dose threshold also does not abort an active cycle or clear a previously parsed time schedule. These are concrete examples in which user expectations and the programmed behavior may differ, and require an explicit once-per-event schedule and cancel/acknowledgment mechanism before a dosing claim is justified.
+
+\subsubsection{Signal Availability and Alarm Meaning}
+The pulse buffer accepts only values strictly between 50 and 130~BPM; a signal outside that range can be rejected while the display retains prior buffered values. SpO\textsubscript{2} is restricted to 80--100\%, so the interface cannot display lower estimates. Finger-signal loss sets the oxygen estimate to zero and disables the positive-low-oxygen alarm condition, making sensor unavailability distinct from an emergency reading. These behaviors need explicit signal-validity/freshness reporting rather than interpretation as a complete physiological alarm system.
+
+The family view's low-pulse alarm requires a positive BPM below 50, while the firmware normally admits pulse estimates above 50. That combination limits the usefulness of the family low-pulse branch for this telemetry source. The patient view labels both low and high nonzero out-of-range pulse readings as \emph{Elevated Heart Rate}, and the doctor page equates ECG zero with disconnected leads. The interfaces need consistent thresholds and separate validity fields to avoid misleading labels.
+
+\subsubsection{Network, Security, and Reproducibility}
+Telemetry has no timestamp, sequence number, stale-data indication, or device identifier. During a connectivity failure, the browser may retain old values and the firmware may continue with previous settings. The HTTP code performs limited status/error validation and uses text searches instead of a structured JSON parser; network and control tasks also share state without an atomic snapshot. These limitations affect command reliability and interpretation of the displayed values.
+
+The archived configuration explicitly disables TLS server verification, and credentials are embedded in the source. The doctor page lacks an authentication guard, registration permits self-selection of the doctor role, and no database-rule file establishes the deployed authorization policy. Server-enforced access rules, authenticated device requests, certificate verification, command validation, and restricted telemetry access are required improvements~\cite{firebaserules,idfhttp}. The shared database paths and flash-size/toolchain inconsistencies further limit reproducibility and extension to multiple patients.
+
+\subsection{Depth of Knowledge (P1)}
+The project requires knowledge across microcontroller architecture, ADC and serial interfaces, PWM timing, filtering, FreeRTOS tasks, network protocols, cloud data, and electromechanical design. It also requires understanding why a sensor output, a filtered estimate, a software actuator state, and an independently measured delivered quantity are different forms of evidence. These interacting domains support the depth-of-knowledge mapping for P1.
+
+\subsection{Conflicting Requirements and Trade-offs (P2)}
+Affordability and a single-controller design favor inexpensive sensors and servo mechanisms, while accurate delivery and robust monitoring require calibration, feedback, and additional fault detection. Strong smoothing improves display stability but delays changes; separating cloud requests from the local loop improves continuity but introduces shared-state synchronization requirements. The implementation therefore trades hardware simplicity and development effort against measurement fidelity, response predictability, and verified control.
+
+\subsection{Two Alternative Designs and Analysis (P3)}
+\subsubsection{Alternative 1: Instrumented Stepper/Lead-Screw Syringe}
+A stepper motor, lead screw, homing switches, and plunger-position/force sensing would make commanded displacement more explicit than a fixed servo sweep. With a measured syringe bore area $A$ and plunger displacement $\Delta x$, the nominal geometric delivery is $\Delta V=A\Delta x$, but backlash, fluid compliance, and pressure still require collection-based calibration. This alternative adds motor-driver, mechanical, and sensing cost, yet offers a clearer route to volume/rate control and fault detection than the archived mechanism.
+
+\subsubsection{Alternative 2: Passive Monitor with Manual Infusion Control}
+A monitoring-only device could combine load-cell and optical drop sensing, retain the physiological channels, and alert a caregiver without remotely actuating fluid delivery. This would reduce actuator complexity and associated command hazards, while still requiring reliable calibration and alarm evaluation. It would provide less automation and retain manual response time, but could be a more focused first stage for validating sensing and caregiver usability. The optical/load-cell integration in prior work~\cite{lee2021} provides a relevant design precedent.
+
+\subsection{Impact and Familiarity of Issues (P4)}
+The intended application extends beyond routine computer-science coursework into medical workflow, fluid mechanics, physiological measurement, and human interaction. The potential benefit is a common view of fluid estimates and sensor status that can support caregiver attention, particularly where equipment cost matters. That benefit remains an engineering objective; there is no supplied evidence of improved clinical outcomes or reduced staff workload, and those questions require domain expertise and evaluation with intended users.
+
+\subsection{Standards, Manuals, and Ethical Considerations (P5)}
+Relevant references include device documentation, the NXP I\textsuperscript{2}C specification, and ESP-IDF/Firebase manuals, although the archive contains neither electrical/timing compliance measurements nor a record of the manuals originally studied by the team~\cite{max30102,ad8232,i2cmanual,idfhttp,firebaserules}. The 100~kHz I\textsuperscript{2}C setting matches Standard-mode, while disabled TLS verification departs from authenticated server verification; use of a named protocol alone therefore does not establish complete compliance. The ACM code motivates honest performance claims, privacy, and avoidance of harm~\cite{acmethics}, while FDA infusion guidance provides a comparator for hazard analysis, alarm behavior, and evaluation~\cite{fdaguidance}, without establishing certification of this prototype or compliance with local clinical requirements.
+
+\subsection{Stakeholders and Requirement Incorporation (P6)}
+The implemented views identify doctors, patients, and family/guardians as intended stakeholders, and the slides also identify nursing workload as a motivation. Their represented requirements differ: clinicians need telemetry and controllable thresholds, patients need a simple display, and families need accessible status and warnings. However, no interview notes, stakeholder approvals, funding discussions, or usability-study results were supplied. P6 is therefore left unmarked until actual consultation and resulting design changes are documented; intended users alone do not demonstrate stakeholder involvement.
+
+\subsection{Module Interdependence (P7)}
+Sensor interfaces, local control, cloud synchronization, and browser views form recognizable modules, and the local loop can continue while the network task is delayed. Nevertheless, remote controls depend on Wi-Fi/Firebase and a shared settings schema, while browser status depends on device publication and both tasks share mutable variables. The physical sensors/actuators are coupled to firmware pins and calibration, so modular files and separate tasks provide partial separation rather than complete independence.
+
+\subsection{Complex Engineering Problem Mapping}
+Table~\ref{tab:cep} marks the aspects discussed with evidence or design analysis. P5 represents the documented interface/security/ethical considerations, not a certification claim. P6 remains pending because consultation evidence is absent.
+\begin{table}[!t]
+\caption{Complex Engineering Problem Mapping}\label{tab:cep}
+\centering\small
+\begin{tabular}{ccccccc}
+\toprule
+P1 & P2 & P3 & P4 & P5 & P6 & P7 \\
+\midrule
+$\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & --- & $\checkmark$ \\
+\bottomrule
+\end{tabular}
+\par\smallskip\footnotesize
+P1: depth of knowledge; P2: conflicting requirements; P3: depth of analysis; P4: familiarity of issues; P5: extent of applicable codes; P6: extent of stakeholders; P7: interdependence.
+\end{table}

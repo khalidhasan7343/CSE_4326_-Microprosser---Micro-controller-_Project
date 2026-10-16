@@ -1,0 +1,587 @@
+perl: warning: Setting locale failed.
+perl: warning: Please check that your locale settings:
+	LC_ALL = "C.UTF-8",
+	LC_CTYPE = "C",
+	LC_NUMERIC = "C",
+	LC_COLLATE = "C",
+	LC_TIME = (unset),
+	LC_MONETARY = (unset),
+	LANG = "C.UTF-8"
+    are supported and installed on your system.
+perl: warning: Falling back to the system default locale ("English_United States.1252").
+Initial Win CP for (console input, console output, system): (CP437, CP65001, CP1252)
+I changed them all to CP1252
+Rc files read (in order):
+  NONE
+Latexmk: This is Latexmk, John Collins, 9 March 2026. Version 4.88.
+Latexmk: applying rule 'pdflatex'...
+Rule 'pdflatex':  Reasons for rerun
+Changed files or newly in use/created:
+  chapters/06_conclusion.tex
+  chapters/07_appendices.tex
+  conference_101719.tex
+  project_metadata.tex
+Category 'changed_user':
+  chapters/06_conclusion.tex
+  chapters/07_appendices.tex
+  conference_101719.tex
+  project_metadata.tex
+
+------------
+Run number 1 of rule 'pdflatex'
+------------
+------------
+Running 'pdflatex  -interaction=nonstopmode -halt-on-error -recorder  "conference_101719.tex"'
+------------
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./conference_101719.tex
+LaTeX2e <2026-06-01>
+L3 programming layer <2026-09-09>
+(./IEEEtran.cls
+Document Class: IEEEtran 2015/08/26 V1.8b by Michael Shell
+-- See the "IEEEtran_HOWTO" manual for usage information.
+-- http://www.michaelshell.org/tex/ieeetran/
+(c:/texlive/2026/texmf-dist/tex/latex/psnfss/ot1ptm.fd)
+-- Using 8.5in x 11in (letter) paper.
+-- Using PDF output.
+-- This is a 10 point document.
+) (c:/texlive/2026/texmf-dist/tex/latex/cite/cite.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(c:/texlive/2026/texmf-dist/tex/latex/amsmath/amstext.sty
+(c:/texlive/2026/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(c:/texlive/2026/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(c:/texlive/2026/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(c:/texlive/2026/texmf-dist/tex/latex/amsfonts/amsfonts.sty))
+(c:/texlive/2026/texmf-dist/tex/latex/graphics/graphicx.sty
+(c:/texlive/2026/texmf-dist/tex/latex/graphics/keyval.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/graphics/graphics.sty
+(c:/texlive/2026/texmf-dist/tex/latex/graphics/trig.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)
+(c:/texlive/2026/texmf-dist/tex/latex/graphics-def/pdftex.def)))
+(c:/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty
+(c:/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(c:/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx))
+(c:/texlive/2026/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/tools/tabularx.sty
+(c:/texlive/2026/texmf-dist/tex/latex/tools/array.sty))
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfutil-latex.def)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.tex
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/pgf.revision.tex)))
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibraryfiltered.co
+de.tex)) (c:/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-pdftex.def
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.def))
+)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.tex
+)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.tex
+)) (c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code.te
+x)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonometric
+.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.code.t
+ex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison.co
+de.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.tex
+)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code.te
+x)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.tex
+)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerarithm
+etics.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex))
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfint.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.cod
+e.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code.te
+x)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.code
+.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformations.c
+ode.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.tex)
+
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing.co
+de.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.tex
+) (c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.tex
+)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.code
+.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.tex
+) (c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.code.tex)))
+ (c:/texlive/2026/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex)
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65.st
+y)
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18.st
+y)) (c:/texlive/2026/texmf-dist/tex/latex/pgf/utilities/pgffor.sty
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/utilities/pgfkeys.sty
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex))
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/math/pgfmath.sty
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex))
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgffor.code.tex))
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tikz.code.tex
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/libraries/pgflibraryplothandlers.co
+de.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/modules/pgfmodulematrix.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzli
+brarytopaths.code.tex)))
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/libraries/pgflibraryarrows.meta.cod
+e.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzli
+brarypositioning.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzli
+brarycalc.code.tex) (c:/texlive/2026/texmf-dist/tex/latex/url/url.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/hyperref/hyperref.sty
+(c:/texlive/2026/texmf-dist/tex/generic/iftex/iftex.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty)
+(c:/texlive/2026/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(c:/texlive/2026/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+(c:/texlive/2026/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(c:/texlive/2026/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(c:/texlive/2026/texmf-dist/tex/generic/infwarerr/infwarerr.sty)))
+(c:/texlive/2026/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/hyperref/nameref.sty
+(c:/texlive/2026/texmf-dist/tex/latex/refcount/refcount.sty)
+(c:/texlive/2026/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+(c:/texlive/2026/texmf-dist/tex/latex/kvoptions/kvoptions.sty)))
+(c:/texlive/2026/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(c:/texlive/2026/texmf-dist/tex/generic/stringenc/stringenc.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(c:/texlive/2026/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/hyperref/puenc.def)
+(c:/texlive/2026/texmf-dist/tex/generic/bitset/bitset.sty
+(c:/texlive/2026/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty)))
+(c:/texlive/2026/texmf-dist/tex/latex/hyperref/hpdftex.def
+(c:/texlive/2026/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(c:/texlive/2026/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+(./project_metadata.tex)
+(c:/texlive/2026/texmf-dist/tex/latex/l3kernel/l3backend-pdftex.def)
+(./conference_101719.aux)
+-- Lines per column: 56 (exact).
+(c:/texlive/2026/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (c:/texlive/2026/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(c:/texlive/2026/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+(./conference_101719.out) (./conference_101719.out)
+(./chapters/01_introduction.tex [1{c:/texlive/2026/texmf-var/fonts/map/pdftex/u
+pdmap/pdftex.map}{c:/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc}]
+(c:/texlive/2026/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(c:/texlive/2026/texmf-dist/tex/latex/amsfonts/umsb.fd))
+(./chapters/02_proposed_method.tex
+(c:/texlive/2026/texmf-dist/tex/latex/psnfss/ot1pcr.fd) [2]
+Underfull \vbox (badness 10000) has occurred while \output is active [3])
+(./chapters/03_implemented_hardware.tex
+Underfull \hbox (badness 1983) in paragraph at lines 31--32
+[]\OT1/ptm/m/n/10 Table []IV[] gives the code/wiring pin as-sign-ment. The
+
+Underfull \hbox (badness 2521) in paragraph at lines 31--32
+\OT1/ptm/m/n/10 MAX30102 com-mu-ni-cates through SDA and SCL; the
+[4]
+Underfull \hbox (badness 6842) in paragraph at lines 59--60
+[]\OT1/ptm/m/n/10 A con-fig-u-ra-tion in-con-sis-tency af-fects re-pro-ducibil-
+ity:
+) (./chapters/04_results.tex [5]
+Underfull \vbox (badness 1571) has occurred while \output is active [6 <../Proj
+ect_images/6.jpeg> <../Project_images/3.jpeg> <../Project_images/4.jpeg>])
+(./chapters/05_discussion.tex [7 <../Project_images/1.jpeg>]
+Underfull \vbox (badness 10000) has occurred while \output is active
+Underfull \vbox (badness 10000) has occurred while \output is active [8 <../Web
+site_images/web_1.jpeg>]
+Underfull \hbox (badness 1817) in paragraph at lines 27--28
+ \OT1/ptm/m/it/10 1) Al-ter-na-tive 1: In-stru-mented Stepper/Lead-Screw Sy-
+[9 <../Website_images/web_5.jpeg> <../Website_images/web_2.jpeg>])
+(./chapters/06_conclusion.tex) (./references.tex [10]
+Underfull \hbox (badness 2277) in paragraph at lines 12--13
+\OT1/ptm/m/n/8 pulse oxime-ter and heart-rate sen-sor for wear-able health,'' d
+ata
+
+Underfull \hbox (badness 4072) in paragraph at lines 21--22
+[]\OT1/ptm/m/n/8 NXP Semi-con-duc-tors, ``I[] C-bus spec-i-fi-ca-tion and user 
+man-ual,''
+
+Underfull \hbox (badness 10000) in paragraph at lines 33--34
+\OT1/ptm/m/n/8 com / khalidhasan7343 / CSE[]4326[]-[]Microprosser-[]-[]-[]Micro
+-[]controller-[][]
+
+Underfull \hbox (badness 5147) in paragraph at lines 36--37
+[]\OT1/ptm/m/n/8 MediSmart project team, ``Project demon-stra-tion video.'' \OT
+1/ptm/m/it/8 [ADD
+) (./chapters/07_appendices.tex [11]
+Underfull \hbox (badness 10000) in paragraph at lines 44--45
+[]$\OT1/pcr/m/n/10 Website _ images / web _ 1 . jpeg$ \OT1/ptm/m/n/10 through
+
+Underfull \hbox (badness 1484) in paragraph at lines 44--45
+\OT1/pcr/m/n/10 web_7.jpeg\OT1/ptm/m/n/10 : dash-board, reg-is-tra-tion, and da
+ta-base
+
+Underfull \hbox (badness 4621) in paragraph at lines 45--46
+[]$\OT1/pcr/m/n/10 medismart/$\OT1/ptm/m/n/10 : sen-sor and ac-tu-a-tor wiring 
+PNGs,
+
+Underfull \hbox (badness 2080) in paragraph at lines 45--46
+\OT1/pcr/m/n/10 firebase.json\OT1/ptm/m/n/10 , $\OT1/pcr/m/n/10 public/$ \OT1/p
+tm/m/n/10 browser sources, and
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
+[]$\OT1/pcr/m/n/10 CSE _ 4326 _ Project _ Paper/$\OT1/ptm/m/n/10 : the IEEE
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
+\OT1/ptm/m/n/10 mas-ter, chap-ter files, meta-data place-hold-ers,
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
+\OT1/pcr/m/n/10 IEEEtran.cls\OT1/ptm/m/n/10 , \OT1/pcr/m/n/10 IEEEtran_HOWTO.pd
+f\OT1/ptm/m/n/10 , and
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
+\OT1/pcr/m/n/10 REPORT_INSTRUCTIONS.md\OT1/ptm/m/n/10 ; $\OT1/pcr/m/n/10 materi
+als/$
+
+Underfull \hbox (badness 5446) in paragraph at lines 46--47
+\OT1/ptm/m/n/10 pre-serves the orig-i-nal tem-plate and source-review
+)
+
+** Conference Paper **
+Before submitting the final camera ready copy, remember to:
+
+ 1. Manually equalize the lengths of two columns on the last page
+ of your paper;
+
+ 2. Ensure that any PostScript and/or PDF output post-processing
+ uses only Type 1 fonts and that every step in the generation
+ process uses the appropriate paper size.
+
+[12] (./conference_101719.aux) )
+(see the transcript file for additional information)<c:/texlive/2026/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmex10.pfb><c:/texlive/2026/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2026/texmf-dist/fonts/type1/publi
+c/amsfonts/cm/cmmi6.pfb><c:/texlive/2026/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmmi7.pfb><c:/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.
+pfb><c:/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/te
+xlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb><c:/texlive/2026/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb><c:/texlive/2026/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmsy10.pfb><c:/texlive/2026/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmsy7.pfb><c:/texlive/2026/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmsy8.pfb><c:/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmsy9.pfb><c:/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/symbols/msa
+m10.pfb><c:/texlive/2026/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb><c:/texl
+ive/2026/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><c:/texlive/2026/texmf-dis
+t/fonts/type1/urw/times/utmbi8a.pfb><c:/texlive/2026/texmf-dist/fonts/type1/urw
+/times/utmr8a.pfb><c:/texlive/2026/texmf-dist/fonts/type1/urw/times/utmri8a.pfb
+>
+Output written on conference_101719.pdf (12 pages, 691956 bytes).
+Transcript written on conference_101719.log.
+Latexmk: Getting log file 'conference_101719.log'
+Latexmk: Examining 'conference_101719.fls'
+Latexmk: Examining 'conference_101719.log'
+Latexmk: Log file says output to 'conference_101719.pdf'
+Latexmk: applying rule 'pdflatex'...
+Rule 'pdflatex':  Reasons for rerun
+Changed files or newly in use/created:
+  conference_101719.aux
+
+------------
+Run number 2 of rule 'pdflatex'
+------------
+------------
+Running 'pdflatex  -interaction=nonstopmode -halt-on-error -recorder  "conference_101719.tex"'
+------------
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./conference_101719.tex
+LaTeX2e <2026-06-01>
+L3 programming layer <2026-09-09>
+(./IEEEtran.cls
+Document Class: IEEEtran 2015/08/26 V1.8b by Michael Shell
+-- See the "IEEEtran_HOWTO" manual for usage information.
+-- http://www.michaelshell.org/tex/ieeetran/
+(c:/texlive/2026/texmf-dist/tex/latex/psnfss/ot1ptm.fd)
+-- Using 8.5in x 11in (letter) paper.
+-- Using PDF output.
+-- This is a 10 point document.
+) (c:/texlive/2026/texmf-dist/tex/latex/cite/cite.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(c:/texlive/2026/texmf-dist/tex/latex/amsmath/amstext.sty
+(c:/texlive/2026/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(c:/texlive/2026/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(c:/texlive/2026/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(c:/texlive/2026/texmf-dist/tex/latex/amsfonts/amsfonts.sty))
+(c:/texlive/2026/texmf-dist/tex/latex/graphics/graphicx.sty
+(c:/texlive/2026/texmf-dist/tex/latex/graphics/keyval.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/graphics/graphics.sty
+(c:/texlive/2026/texmf-dist/tex/latex/graphics/trig.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)
+(c:/texlive/2026/texmf-dist/tex/latex/graphics-def/pdftex.def)))
+(c:/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty
+(c:/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(c:/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx))
+(c:/texlive/2026/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/tools/tabularx.sty
+(c:/texlive/2026/texmf-dist/tex/latex/tools/array.sty))
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfutil-latex.def)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.tex
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/pgf.revision.tex)))
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibraryfiltered.co
+de.tex)) (c:/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-pdftex.def
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.def))
+)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.tex
+)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.tex
+)) (c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code.te
+x)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonometric
+.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.code.t
+ex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison.co
+de.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.tex
+)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code.te
+x)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.tex
+)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerarithm
+etics.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex))
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfint.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.cod
+e.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code.te
+x)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.code
+.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformations.c
+ode.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.tex)
+
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing.co
+de.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.tex
+) (c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.tex
+)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.code
+.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.tex
+) (c:/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.code.tex)))
+ (c:/texlive/2026/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex)
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65.st
+y)
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18.st
+y)) (c:/texlive/2026/texmf-dist/tex/latex/pgf/utilities/pgffor.sty
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/utilities/pgfkeys.sty
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex))
+(c:/texlive/2026/texmf-dist/tex/latex/pgf/math/pgfmath.sty
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex))
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgffor.code.tex))
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tikz.code.tex
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/libraries/pgflibraryplothandlers.co
+de.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/modules/pgfmodulematrix.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzli
+brarytopaths.code.tex)))
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/libraries/pgflibraryarrows.meta.cod
+e.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzli
+brarypositioning.code.tex)
+(c:/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzli
+brarycalc.code.tex) (c:/texlive/2026/texmf-dist/tex/latex/url/url.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/hyperref/hyperref.sty
+(c:/texlive/2026/texmf-dist/tex/generic/iftex/iftex.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty)
+(c:/texlive/2026/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(c:/texlive/2026/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+(c:/texlive/2026/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(c:/texlive/2026/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(c:/texlive/2026/texmf-dist/tex/generic/infwarerr/infwarerr.sty)))
+(c:/texlive/2026/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/hyperref/nameref.sty
+(c:/texlive/2026/texmf-dist/tex/latex/refcount/refcount.sty)
+(c:/texlive/2026/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+(c:/texlive/2026/texmf-dist/tex/latex/kvoptions/kvoptions.sty)))
+(c:/texlive/2026/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(c:/texlive/2026/texmf-dist/tex/generic/stringenc/stringenc.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(c:/texlive/2026/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(c:/texlive/2026/texmf-dist/tex/latex/hyperref/puenc.def)
+(c:/texlive/2026/texmf-dist/tex/generic/bitset/bitset.sty
+(c:/texlive/2026/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty)))
+(c:/texlive/2026/texmf-dist/tex/latex/hyperref/hpdftex.def
+(c:/texlive/2026/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(c:/texlive/2026/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+(./project_metadata.tex)
+(c:/texlive/2026/texmf-dist/tex/latex/l3kernel/l3backend-pdftex.def)
+(./conference_101719.aux)
+-- Lines per column: 56 (exact).
+(c:/texlive/2026/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (c:/texlive/2026/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(c:/texlive/2026/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+(./conference_101719.out) (./conference_101719.out)
+(./chapters/01_introduction.tex [1{c:/texlive/2026/texmf-var/fonts/map/pdftex/u
+pdmap/pdftex.map}{c:/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc}]
+(c:/texlive/2026/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(c:/texlive/2026/texmf-dist/tex/latex/amsfonts/umsb.fd))
+(./chapters/02_proposed_method.tex
+(c:/texlive/2026/texmf-dist/tex/latex/psnfss/ot1pcr.fd) [2]
+Underfull \vbox (badness 10000) has occurred while \output is active [3])
+(./chapters/03_implemented_hardware.tex
+Underfull \hbox (badness 1983) in paragraph at lines 31--32
+[]\OT1/ptm/m/n/10 Table []IV[] gives the code/wiring pin as-sign-ment. The
+
+Underfull \hbox (badness 2521) in paragraph at lines 31--32
+\OT1/ptm/m/n/10 MAX30102 com-mu-ni-cates through SDA and SCL; the
+[4]
+Underfull \hbox (badness 6842) in paragraph at lines 59--60
+[]\OT1/ptm/m/n/10 A con-fig-u-ra-tion in-con-sis-tency af-fects re-pro-ducibil-
+ity:
+) (./chapters/04_results.tex [5]
+Underfull \vbox (badness 1571) has occurred while \output is active [6 <../Proj
+ect_images/6.jpeg> <../Project_images/3.jpeg> <../Project_images/4.jpeg>])
+(./chapters/05_discussion.tex [7 <../Project_images/1.jpeg>]
+Underfull \vbox (badness 10000) has occurred while \output is active
+Underfull \vbox (badness 10000) has occurred while \output is active [8 <../Web
+site_images/web_1.jpeg>]
+Underfull \hbox (badness 1817) in paragraph at lines 27--28
+ \OT1/ptm/m/it/10 1) Al-ter-na-tive 1: In-stru-mented Stepper/Lead-Screw Sy-
+[9 <../Website_images/web_5.jpeg> <../Website_images/web_2.jpeg>])
+(./chapters/06_conclusion.tex) (./references.tex [10]
+Underfull \hbox (badness 2277) in paragraph at lines 12--13
+\OT1/ptm/m/n/8 pulse oxime-ter and heart-rate sen-sor for wear-able health,'' d
+ata
+
+Underfull \hbox (badness 4072) in paragraph at lines 21--22
+[]\OT1/ptm/m/n/8 NXP Semi-con-duc-tors, ``I[] C-bus spec-i-fi-ca-tion and user 
+man-ual,''
+
+Underfull \hbox (badness 10000) in paragraph at lines 33--34
+\OT1/ptm/m/n/8 com / khalidhasan7343 / CSE[]4326[]-[]Microprosser-[]-[]-[]Micro
+-[]controller-[][]
+
+Underfull \hbox (badness 5147) in paragraph at lines 36--37
+[]\OT1/ptm/m/n/8 MediSmart project team, ``Project demon-stra-tion video.'' \OT
+1/ptm/m/it/8 [ADD
+) (./chapters/07_appendices.tex [11]
+Underfull \hbox (badness 10000) in paragraph at lines 44--45
+[]$\OT1/pcr/m/n/10 Website _ images / web _ 1 . jpeg$ \OT1/ptm/m/n/10 through
+
+Underfull \hbox (badness 1484) in paragraph at lines 44--45
+\OT1/pcr/m/n/10 web_7.jpeg\OT1/ptm/m/n/10 : dash-board, reg-is-tra-tion, and da
+ta-base
+
+Underfull \hbox (badness 4621) in paragraph at lines 45--46
+[]$\OT1/pcr/m/n/10 medismart/$\OT1/ptm/m/n/10 : sen-sor and ac-tu-a-tor wiring 
+PNGs,
+
+Underfull \hbox (badness 2080) in paragraph at lines 45--46
+\OT1/pcr/m/n/10 firebase.json\OT1/ptm/m/n/10 , $\OT1/pcr/m/n/10 public/$ \OT1/p
+tm/m/n/10 browser sources, and
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
+[]$\OT1/pcr/m/n/10 CSE _ 4326 _ Project _ Paper/$\OT1/ptm/m/n/10 : the IEEE
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
+\OT1/ptm/m/n/10 mas-ter, chap-ter files, meta-data place-hold-ers,
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
+\OT1/pcr/m/n/10 IEEEtran.cls\OT1/ptm/m/n/10 , \OT1/pcr/m/n/10 IEEEtran_HOWTO.pd
+f\OT1/ptm/m/n/10 , and
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
+\OT1/pcr/m/n/10 REPORT_INSTRUCTIONS.md\OT1/ptm/m/n/10 ; $\OT1/pcr/m/n/10 materi
+als/$
+
+Underfull \hbox (badness 5446) in paragraph at lines 46--47
+\OT1/ptm/m/n/10 pre-serves the orig-i-nal tem-plate and source-review
+)
+
+** Conference Paper **
+Before submitting the final camera ready copy, remember to:
+
+ 1. Manually equalize the lengths of two columns on the last page
+ of your paper;
+
+ 2. Ensure that any PostScript and/or PDF output post-processing
+ uses only Type 1 fonts and that every step in the generation
+ process uses the appropriate paper size.
+
+[12] (./conference_101719.aux) )
+(see the transcript file for additional information)<c:/texlive/2026/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmex10.pfb><c:/texlive/2026/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2026/texmf-dist/fonts/type1/publi
+c/amsfonts/cm/cmmi6.pfb><c:/texlive/2026/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmmi7.pfb><c:/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.
+pfb><c:/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/te
+xlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb><c:/texlive/2026/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb><c:/texlive/2026/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmsy10.pfb><c:/texlive/2026/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmsy7.pfb><c:/texlive/2026/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmsy8.pfb><c:/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmsy9.pfb><c:/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/symbols/msa
+m10.pfb><c:/texlive/2026/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb><c:/texl
+ive/2026/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><c:/texlive/2026/texmf-dis
+t/fonts/type1/urw/times/utmbi8a.pfb><c:/texlive/2026/texmf-dist/fonts/type1/urw
+/times/utmr8a.pfb><c:/texlive/2026/texmf-dist/fonts/type1/urw/times/utmri8a.pfb
+>
+Output written on conference_101719.pdf (12 pages, 691956 bytes).
+Transcript written on conference_101719.log.
+Latexmk: Getting log file 'conference_101719.log'
+Latexmk: Examining 'conference_101719.fls'
+Latexmk: Examining 'conference_101719.log'
+Latexmk: Log file says output to 'conference_101719.pdf'
+Latexmk: All targets (conference_101719.pdf) are up-to-date
+
+Reverting Windows console CPs to (in,out) = (437,65001)

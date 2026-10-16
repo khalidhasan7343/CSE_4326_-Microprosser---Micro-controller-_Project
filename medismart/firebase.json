@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "predeploy": "node scripts/configure.cjs --web",
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

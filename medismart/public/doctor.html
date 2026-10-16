@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediSmart Dashboard</title>
+    <!-- Bootstrap for clean styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js for ECG graph -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f4f6f9; padding-top: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; margin-bottom: 20px; border: none; }
+        .vitals-number { font-size: 3.5rem; font-weight: bold; color: #0d47a1; margin: 10px 0; }
+        .alert-bar { font-weight: bold; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; display: none; }
+        .alert-ecg { background-color: #ffebee; color: #c62828; }
+        .alert-o2 { background-color: #fff3cd; color: #856404; }
+        .status-badge { font-size: 0.9rem; padding: 5px 10px; border-radius: 20px; background-color: #e3f2fd; color: #1565c0; margin-top: 5px; display: inline-block; font-weight: 600;}
+        .override-label { font-size: 0.85rem; font-weight: bold; color: #6c757d; text-transform: uppercase; margin-top: 15px; margin-bottom: 5px; display: block;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Critical Alerts -->
+    <div class="alert-bar alert-ecg" id="ecgAlert">
+        ⚠️ ECG Lead Disconnected: Please check chest/arm electrodes!
+    </div>
+    <div class="alert-bar alert-o2" id="o2Alert">
+        ⚠️ LOW OXYGEN DETECTED (SpO₂ < 85%): Emergency O2 Valve Activating!
+    </div>
+
+    <div class="row">
+        <!-- Heart Rate Card -->
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <h5 class="text-muted text-uppercase">Heart Rate</h5>
+                <div class="vitals-number" id="valBPM">0</div>
+                <div class="text-muted">BPM</div>
+            </div>
+        </div>
+
+        <!-- SpO2 Card -->
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <h5 class="text-muted text-uppercase">Oxygen Saturation</h5>
+                <div class="vitals-number" id="valSpO2">0</div>
+                <div class="text-muted">% SpO₂</div>
+            </div>
+        </div>
+
+        <!-- Saline & Controls Card -->
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <h5 class="text-muted text-uppercase">Saline Volume</h5>
+                <div class="vitals-number" id="valSaline">0</div>
+                <div class="text-muted mb-3">Milliliters (ml)</div>
+                
+                <hr>
+
+                <!-- Automatic Thresholds -->
+                <div class="text-start">
+                    <label class="form-label fw-bold text-danger mb-1">🔴 Stop Saline Flow at (ml):</label>
+                    <input type="number" class="form-control form-control-sm mb-1" id="inputStopSaline" placeholder="e.g. 108">
+                    <div class="text-center mb-2"><span class="status-badge" id="statusSaline">Valve: Unknown</span></div>
+                    
+                    <label class="form-label fw-bold text-secondary mb-1">💉 Auto-Push Dose at (ml):</label>
+                    <input type="number" class="form-control form-control-sm mb-1" id="inputDoseTrigger" placeholder="e.g. 136">
+                    <div class="text-center mb-3"><span class="status-badge" id="statusDose">Syringe: Unknown</span></div>
+
+                    <button class="btn btn-primary btn-sm w-100 mb-2" onclick="syncToESP32()">Sync Auto-Thresholds</button>
+                    
+                    <!-- Manual Override Controls -->
+                    <span class="override-label">Manual Override Controls</span>
+                    <div class="d-flex justify-content-between mb-2">
+                        <button class="btn btn-outline-danger btn-sm w-100 me-1" onclick="closeValve()">Close Valve</button>
+                        <button class="btn btn-outline-success btn-sm w-100 ms-1" onclick="openValve()">Open Valve</button>
+                    </div>
+                    <button class="btn btn-outline-warning btn-sm w-100" onclick="resetDose()">Reset Dose Syringe</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live ECG Rhythm Strip -->
+    <div class="card p-4 mt-1">
+        <h5 class="text-start mb-3" style="font-weight: bold; color: #333;">Live Electrocardiogram (ECG) Rhythm Strip</h5>
+        <canvas id="ecgChart" height="80"></canvas>
+    </div>
+</div>
+
+<!-- Firebase v8 SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script src="firebase-config.js"></script>
+<script>
+    // 1. INITIALIZE DATABASE
+
+    const db = firebase.database();
+
+    // 2. INITIALIZE ECG CHART
+    const ctx = document.getElementById('ecgChart').getContext('2d');
+    const maxDataPoints = 50; 
+    const initialData = Array(maxDataPoints).fill(0);
+    const initialLabels = Array(maxDataPoints).fill('');
+
+    const ecgChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: initialLabels,
+            datasets: [{
+                label: 'Cardiac Electrical Activity',
+                borderColor: '#e53935', 
+                backgroundColor: 'rgba(229, 57, 53, 0.1)',
+                borderWidth: 2,
+                pointRadius: 0, 
+                data: initialData,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: false, 
+            scales: {
+                x: { display: false }, 
+                y: { min: 0, max: 4095, grid: { color: '#e0e0e0' } }
+            },
+            plugins: { legend: { position: 'top' } }
+        }
+    });
+
+    // 3. LISTEN TO VITALS
+    db.ref('vitals').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            document.getElementById('valBPM').innerText = data.bpm ? data.bpm.toFixed(1) : "0";
+            document.getElementById('valSpO2').innerText = data.spo2 ? data.spo2.toFixed(1) : "0";
+            document.getElementById('valSaline').innerText = data.current_ml ? data.current_ml.toFixed(1) : "0";
+            
+            if(data.saline_status) document.getElementById('statusSaline').innerText = "Valve: " + data.saline_status;
+            if(data.dose_status) document.getElementById('statusDose').innerText = "Syringe: " + data.dose_status;
+
+            // Alerts Logic
+            document.getElementById('ecgAlert').style.display = (data.ecg === 0) ? 'block' : 'none';
+            document.getElementById('o2Alert').style.display = (data.spo2 > 0 && data.spo2 < 85.0) ? 'block' : 'none';
+
+            // ECG Chart Update
+            if (data.ecg !== undefined) {
+                ecgChart.data.datasets[0].data.push(data.ecg);
+                ecgChart.data.datasets[0].data.shift(); 
+                ecgChart.update();
+            }
+        }
+    });
+
+    // 4. LISTEN TO SETTINGS
+    db.ref('settings').on('value', (snapshot) => {
+        const settings = snapshot.val();
+        if (settings) {
+            document.getElementById('inputStopSaline').value = settings.saline_stop_ml === 9999 ? "" : (settings.saline_stop_ml || "");
+            document.getElementById('inputDoseTrigger').value = settings.dose_trigger_ml || "";
+        }
+    });
+
+    // 5. BUTTON FUNCTIONS
+    function syncToESP32() {
+        const stopMl = parseFloat(document.getElementById('inputStopSaline').value) || 0;
+        const doseMl = parseFloat(document.getElementById('inputDoseTrigger').value) || 0;
+        db.ref('settings').update({ saline_stop_ml: stopMl, dose_trigger_ml: doseMl });
+    }
+
+    function openValve() {
+        db.ref('settings').update({ saline_stop_ml: 0 }); // 0 ensures condition is false (valve opens)
+    }
+
+    function closeValve() {
+        db.ref('settings').update({ saline_stop_ml: 9999 }); // 9999 ensures condition is true (valve clamps)
+    }
+
+    function resetDose() {
+        db.ref('settings').update({ dose_trigger_ml: 0 }); // Resets syringe sequence
+    }
+</script>
+</body>
+</html>

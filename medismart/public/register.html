@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MediSmart | Create Account</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f7; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background: #ffffff; padding: 40px; border-radius: 12px; width: 340px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); text-align: center; }
+    h2 { color: #1e3c72; margin-bottom: 20px; }
+    select, input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #dcdfe6; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    button { width: 100%; padding: 12px; background: #1e88e5; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+    button:hover { background: #1565c0; }
+    p { font-size: 13px; color: #666; margin-top: 20px; }
+    a { color: #1e88e5; text-decoration: none; font-weight: 600; }
+    #msg { font-weight: bold; margin-top: 15px; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Create Account</h2>
+  
+  <select id="userRole">
+    <option value="patient">Patient</option>
+    <option value="family">Family / Guardian</option>
+    <option value="doctor">Medical Doctor</option>
+  </select>
+
+  <input type="email" id="email" placeholder="Email Address">
+  <input type="password" id="password" placeholder="Password (minimum 6 characters)">
+
+  <button onclick="register()">Sign Up</button>
+  <div id="msg"></div>
+
+  <p>Already have an account? <a href="login.html">Sign In</a></p>
+</div>
+
+<script src="firebase-config.js"></script>
+<script>
+
+
+function register() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const role = document.getElementById("userRole").value;
+  const msg = document.getElementById("msg");
+
+  if (!email || !password) {
+    msg.style.color = "#d32f2f";
+    msg.innerText = "Please fill in all fields.";
+    return;
+  }
+
+  msg.style.color = "#1e88e5";
+  msg.innerText = "Creating account...";
+
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then((credential) => {
+      const uid = credential.user.uid;
+      return firebase.database().ref("users/" + uid).set({
+        email: email,
+        role: role
+      });
+    })
+    .then(() => {
+      msg.style.color = "#2e7d32";
+      msg.innerText = "Account ready! Redirecting to login...";
+      setTimeout(() => { window.location.href = "login.html"; }, 1500);
+    })
+    .catch((error) => {
+      msg.style.color = "#d32f2f";
+      msg.innerText = error.message;
+    });
+}
+</script>
+
+</body>
+</html>

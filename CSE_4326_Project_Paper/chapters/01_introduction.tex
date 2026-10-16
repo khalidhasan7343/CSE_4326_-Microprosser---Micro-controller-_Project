@@ -1,0 +1,41 @@
+\section{Introduction}\label{sec:introduction}
+\subsection{Problem Statement and Motivation}
+Intravenous (IV) fluid delivery requires attention to the fluid source, the administration mechanism, and the patient's condition. In a manually supervised arrangement, a caregiver checks the container, adjusts the tubing or clamp, and separately observes vital signs. These activities motivate a common interface that reports fluid status and sensor availability while allowing supervised intervention. Research on remote infusion monitoring has explored optical drop detection and container-weight measurement to support this process~\cite{lee2021}.
+
+The project presentation identifies manual IV and syringe operation, limited continuous monitoring, and repetitive caregiver tasks as the motivating problems. It also identifies affordability and suitability for resource-constrained hospitals in Bangladesh as design goals. These motivations describe the intended application; the provided materials do not contain a hospital deployment, stakeholder interview study, or measured reduction in caregiver workload.
+
+MediSmart brings an IV stopping mechanism, a syringe mechanism, physiological sensing, and remote visualization onto a shared ESP32 platform. The engineering problem is to connect sensors with different interfaces, process their outputs, maintain actuator states, and exchange settings and telemetry over a network without blocking the local control sequence. The project is therefore relevant to microcontroller interfacing, digital signal processing, real-time task design, electromechanical actuation, and web-based monitoring.
+
+\subsection{Objectives and Scope}
+The implemented objectives are to estimate remaining fluid from a load-cell reading; acquire optical pulse and oxygen-saturation signals and an ECG analog signal; operate servo channels according to programmed conditions; activate a local buzzer during the firmware's low-oxygen condition; and expose monitoring/control views through Firebase. The term \emph{dual infusion} refers here to the saline and syringe mechanisms described by the project, rather than to two independently measured and calibrated infusion channels. A third servo channel is designated for an oxygen-related mechanism.
+
+The scope of this report is the archived prototype. Source code establishes the programmed behavior, photographs establish visible construction, and screenshots establish captured interface states. None of these alone establishes calibrated volume delivery or safe therapeutic operation. Measured accuracy, actual response time, and energy efficiency are therefore identified as evaluation tasks rather than assigned numerical values.
+
+\subsection{Literature Review}
+Lee, Yoon, and Kim~\cite{lee2021} combined an optical sensor with a load cell for remote IV monitoring. Their system reports remaining fluid, infusion rate, and expected completion time to caregivers, and the study examines motion-related measurement limitations. This provides a useful comparison because MediSmart also uses container-weight information, but its archived implementation does not combine that reading with an optical drop counter or compute an infusion-rate estimate.
+
+Contardi, Morikawa, Brunelli, and Thomaz~\cite{contardi2022} demonstrated a MAX30102 optical module connected to an ESP32 for remote heart-rate and oxygen-saturation monitoring. Their work supports the feasibility of integrating optical biosensing with a networked microcontroller. MediSmart extends that integration into a prototype that also includes ECG acquisition, fluid estimation, and servo mechanisms; this difference does not demonstrate superior physiological measurement accuracy.
+
+Kok and colleagues~\cite{kok2024} developed a cloud-connected infusion platform with remote supervision through Blynk. Their design includes a stepper-driven pumping mechanism and infusion-related sensing, illustrating the importance of observing delivery as well as commanding a motor. MediSmart instead uses Firebase and three PWM servo channels in the archived firmware. Its saline threshold and syringe motion sequence are simpler than a calibrated infusion-rate controller.
+
+Table~\ref{tab:related} summarizes the features relevant to this project. The comparison concerns the cited implementations and the supplied MediSmart archive; it is not a performance benchmark.
+\begin{table*}[!t]
+\caption{Feature Comparison with Selected Published Work}\label{tab:related}
+\centering\small
+\begin{tabularx}{\textwidth}{@{}P{0.19\textwidth}YYY@{}}
+\toprule
+Work & Main sensing and mechanism & Communication and interface & Relation to MediSmart \\
+\midrule
+Lee, Yoon, and Kim~\cite{lee2021} & Optical drop detection and load-cell monitoring & Remote IV information and notifications & Provides a multisensor comparison; MediSmart's current fluid estimate uses HX711/load-cell input only. \\
+Contardi and colleagues~\cite{contardi2022} & MAX30102 pulse and oxygen-saturation sensing with ESP32 & Remote physiological visualization & Shares the optical sensing/controller combination; MediSmart also incorporates fluid and actuator functions. \\
+Kok and colleagues~\cite{kok2024} & Stepper-driven infusion and delivery-related sensors & Blynk web/mobile supervision & Provides an alternative cloud and pumping architecture; MediSmart implements servo motion and Firebase settings. \\
+MediSmart archive & MAX30102, AD8232, HX711; saline, syringe, and oxygen-designated servos & Shared Firebase telemetry and doctor/patient/family views & Integrates the functions in one educational prototype; calibrated delivery and physiological accuracy are unverified. \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\subsection{Project Contributions and Distinguishing Features}
+The project's contribution is the integration of fluid estimation, physiological acquisition, local actuation, and several caregiver-facing views. The doctor interface changes the remaining-volume rules and displays device-reported valve and syringe states. The patient and family interfaces provide simpler pulse/oxygen displays, with an on-page family alert for programmed conditions. A separate network task exchanges settings while local firmware evaluates the actuator conditions.
+
+These are distinguishing features of this prototype relative to the selected examples, rather than claims that no previous project has implemented them. The archived design also differs from the early presentation: load-cell sensing, AD8232 acquisition, and an oxygen-designated servo appear in the code and wiring; a stepper driver sequence, LCD driver, IR drop-counting routine, and ESP-NOW link do not. Subsequent chapters describe the implementation that can be traced to the supplied evidence.
+

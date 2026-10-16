@@ -1,0 +1,48 @@
+\appendices
+\section{Setup and Laboratory Operating Instructions}
+\label{app:operating-instructions}
+
+These instructions support supervised, nonclinical bench demonstrations. Use water and mechanical mock loads; keep the infusion, syringe, and oxygen-designated mechanisms disconnected from patients. Verify wiring, mechanical clearance, supply capacity, and a means of removing actuator power before starting. The supplied photographs and wiring sketches do not establish clinical or electrical safety.
+
+\subsection{Firmware Preparation}
+Install VS Code with PlatformIO IDE and the board's USB serial driver, then open \path{medismart/medismartVscode/} as the PlatformIO project. Select environment \code{esp32dev}, board \code{esp32dev}, and framework \code{espidf}; the application is ESP-IDF C. Regenerate the included editor/debug configuration because its absolute paths belong to another workstation. Record the installed toolchain and framework versions when reproducing the build.
+
+In \path{src/main.c}, replace the Wi-Fi settings with \placeholder{LAB SSID} and \placeholder{LAB PASSWORD}, and configure matching settings/vitals endpoints for \placeholder{LAB FIREBASE DATABASE URL}. Keep credential values out of submitted listings. Confirm the physical flash capacity: \code{platformio.ini} requests 4~MB, whereas \code{sdkconfig.esp32dev} selects 2~MB. Reconcile the saved configuration and board settings before uploading. The following commands run from the firmware project directory:
+\begin{quote}
+\small
+\code{pio run -e esp32dev}\\
+\code{pio run -e esp32dev -t upload}\\
+\code{pio device monitor -b 115200}
+\end{quote}
+Select the correct serial port if automatic detection fails. Inspect build/upload output and the serial dashboard; a successful compilation alone does not verify connected sensors or mechanisms.
+
+\subsection{Cloud and Browser Configuration}
+Use an isolated laboratory database. Configure Firebase Realtime Database and email/password Authentication, then make the browser pages and firmware reference the same project. Replace the doctor page's API-key, sender-ID, and application-ID placeholders with that project's web configuration. The supplied \code{firebase.json} specifies static content in \path{medismart/public/}; it supplies no database rules.
+
+Before protected operation, implement server-side rules that restrict telemetry writes to the device and settings changes to approved operators. Registration-selected roles must not authorize themselves. This requires corresponding firmware REST authentication and authentication/role checks in the doctor page, which are absent from the supplied code. Restore TLS server verification before protected deployment. Official rule and REST-authentication guidance is available at \url{https://firebase.google.com/docs/database/security} and \url{https://firebase.google.com/docs/database/rest/auth}; secure operation cannot be achieved by changing browser navigation alone.
+
+Open \code{login.html} explicitly: the supplied root page remains Firebase's welcome template. Register a laboratory account using the patient, family, or doctor selection, then sign in. Login reads the saved role and redirects accordingly. Patient/family pages display the shared vital stream; the doctor page adds fluid estimates, statuses, settings, and a rolling received-value ECG plot. These screens provide navigation rather than verified role-based authorization in the current implementation.
+
+\subsection{Startup and Controls}
+After power-up, verify Wi-Fi, database updates, sensor contact, and known-weight/volume calibration before interpreting readings. SNTP uses \code{pool.ntp.org}; the POSIX timezone \code{UTC-6} represents Dhaka's UTC+06:00. Confirm actual synchronization separately because startup does not wait for valid time. Record local/remote observation times to identify stale telemetry.
+
+\emph{Sync Auto-Thresholds} writes both remaining-volume thresholds. A positive saline threshold closes its valve only when the estimate is strictly lower; equality does not trigger closure. A positive dose threshold starts a fixed syringe stroke under the same comparison and does not specify delivered drug volume. Blank or invalid inputs become zero, disabling the corresponding volume condition.
+
+\emph{Open Valve} writes a zero saline threshold. \emph{Close Valve} writes 9999, producing a closure condition only while the estimate is below that sentinel. \emph{Reset Dose Syringe} clears the dose-volume threshold; it does not cancel an active stroke or immediately retract the syringe. Check subsequent physical movement and telemetry because buttons provide no execution acknowledgement.
+
+The firmware parses \code{dose_time}, but the supplied dashboard has no schedule editor. Its matching-minute condition can repeat cycles without an execution latch; leave scheduling disabled until this behavior is corrected and tested. Supervise every bench cycle, record sensor-invalid/network-loss cases, and remove actuator power for a physical stop. Dashboard zeros, software angles, and status labels do not prove physiological validity or delivered volume.
+
+% Begin the artifact inventory in the next column to balance the final page.
+\newpage
+\section{Project Artifact Traceability}
+\label{app:artifact-traceability}
+
+The report uses the following supplied artifact groups; generated build files are not experimental evidence:
+\begin{itemize}
+\item \path{Project_slides/}: the project presentation establishes its title, team, and concept; slide-only features require implementation evidence.
+\item \path{Project_images/1.jpeg} through \code{6.jpeg}: assembly, mechanisms, sensors, and electronics photographs.
+\item \path{Website_images/web_1.jpeg} through \code{web_7.jpeg}: dashboard, registration, and database captures; two pairs repeat the same screens.
+\item \path{medismart/}: sensor and actuator wiring PNGs, \code{firebase.json}, \path{public/} browser sources, and \path{medismartVscode/} firmware/build configuration.
+\item \path{CSE_4326_Project_Paper/}: the IEEE master, chapter files, metadata placeholders, \code{IEEEtran.cls}, \code{IEEEtran_HOWTO.pdf}, and \code{REPORT_INSTRUCTIONS.md}; \path{materials/} preserves the original template and source-review notes.
+\end{itemize}
+The project repository link is provided in the references~\cite{projectgithub}; replace the remaining demonstration-video placeholder before submission~\cite{projectyoutube}. Keep original artifacts and distinguish photographed assembly, screenshot observations, source-derived behavior, and future physical measurements throughout the final report.

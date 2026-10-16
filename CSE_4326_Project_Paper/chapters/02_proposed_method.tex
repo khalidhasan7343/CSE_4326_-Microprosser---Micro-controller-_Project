@@ -1,0 +1,122 @@
+\section{Proposed Method}\label{sec:method}
+\subsection{Block Diagram of the Overall System}
+Fig.~\ref{fig:architecture} presents the implemented signal and control paths. Three sensing inputs feed the ESP32: the MAX30102 supplies red/infrared optical samples over I\textsuperscript{2}C, the AD8232 supplies an analog ECG signal and lead-off indications, and the HX711 supplies digitized load-cell data. The controller processes the samples and drives three servo channels and a buzzer. Wi-Fi connects a separate firmware task to Firebase, which stores current telemetry and remote settings.
+
+\begin{figure*}[!t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[x=1cm,y=1cm,
+ box/.style={draw=black!65,rounded corners=2pt,fill=blue!4,align=center,text width=3.65cm,minimum height=1.0cm,font=\fontsize{8}{9}\selectfont},
+ control/.style={box,fill=blue!12,text width=3.8cm,minimum height=2.1cm},
+ actuator/.style={box,fill=orange!9},
+ flow/.style={-{Latex[length=2mm]},thick},
+ power/.style={-{Latex[length=2mm]},dashed,black!65},
+ lab/.style={font=\fontsize{8}{9}\selectfont,fill=white,inner sep=2pt,align=center}]
+\node[box] (ppg) at (0,0) {MAX30102 optical sensor\\Finger: red and infrared samples};
+\node[box] (ecg) at (0,-1.8) {AD8232 ECG front end\\Analog signal and lead-off pins};
+\node[box] (load) at (0,-3.6) {Load cell + HX711\\Container-load data for fluid estimate};
+\node[control] (esp) at (5.45,-1.8) {ESP32 controller\\Sensor filtering and estimates\\Threshold checks and servo states\\Local loop + network task};
+\node[actuator] (saline) at (10.9,0) {Saline servo mechanism\\Gradually open or clamp the IV tube};
+\node[actuator] (dose) at (10.9,-1.8) {Syringe servo mechanism\\Forward stroke, then return};
+\node[actuator] (o2) at (10.9,-3.6) {Oxygen-designated servo + buzzer\\Respond to low estimated oxygen};
+\node[box,fill=green!7] (cloud) at (5.45,-5.3) {Firebase Realtime Database\\\texttt{/vitals}: current data and states\\\texttt{/settings}: control rules};
+\node[box,text width=7.7cm,fill=green!7] (web) at (5.45,-7.15) {Web interfaces\\Doctor: telemetry and threshold controls\\Patient / family: pulse and oxygen display};
+\node[box,fill=gray!8] (supply) at (0,-5.0) {Power subsystem\\External 5 V actuator rail\\Board/sensor supplies; common ground};
+\draw[flow] (ppg.east) -- (esp.north west) node[midway,lab,above] {I2C};
+\draw[flow] (ecg.east) -- (esp.west) node[midway,lab,above] {ADC + GPIO};
+\draw[flow] (load.east) -- (esp.south west) node[midway,lab,above] {Data + clock};
+\draw[flow] (esp.north east) -- (saline.west) node[midway,lab,above] {PWM};
+\draw[flow] (esp.east) -- (dose.west) node[midway,lab,above] {PWM};
+\draw[flow] (esp.south east) -- (o2.west) node[midway,lab,above] {PWM / GPIO};
+\draw[flow,{Latex[length=2mm]}-{Latex[length=2mm]}] (esp.south) -- (cloud.north) node[midway,lab,left] {Wi-Fi / HTTPS REST\\Telemetry and settings};
+\draw[flow,{Latex[length=2mm]}-{Latex[length=2mm]}] (cloud.south) -- (web.north) node[midway,lab,right] {Database listeners / writes};
+\draw[power] (supply.east) -- (2.3,-5.0) -- (2.3,-2.85) -- (esp.south west);
+\end{tikzpicture}}
+\caption{Overall implementation architecture reconstructed from the firmware, website, and supplied wiring diagrams. Power connections are summarized; the separate wiring diagrams show the detailed rails. Servo arrows indicate commands, without measured flow or position feedback.}\label{fig:architecture}
+\end{figure*}
+
+\subsection{Function of Each Subsystem}
+\subsubsection{Controller and Local Scheduling}
+The ESP32 is configured as a Wi-Fi station. Its main loop reads sensors, calculates conditions, updates servo angles, and prints diagnostics. A FreeRTOS task performs Firebase HTTP requests separately. The main loop ends with a 20~ms delay, while the network task ends with a 2000~ms delay; actual periods also include computation, sensor waiting, request duration, and scheduling.
+
+The network task obtains \code{/settings.json} with GET and updates \code{/vitals.json} with PATCH. This separates the slower network exchanges from the actuator sequence, but shared variables are not protected by a snapshot or mutex. The design is a single-device implementation: the database paths do not include a patient or device identifier.
+
+\subsubsection{Optical Pulse and Oxygen Estimation}
+The MAX30102 contains red/infrared optical sensing and a digital interface~\cite{max30102}. The firmware uses I\textsuperscript{2}C address \code{0x57} at 100~kHz and reads six FIFO bytes per loop to reconstruct the two 18-bit values. An infrared value below 20000 clears the reported pulse and oxygen values, representing no detected usable finger signal.
+
+For a valid optical input, a running DC estimate for channel sample $x[n]$ is
+\begin{equation}
+D[n]=0.95D[n-1]+0.05x[n],\qquad A[n]=x[n]-D[n].
+\end{equation}
+The pulse routine detects an infrared AC threshold crossing followed by a decreasing sample. It imposes an interval greater than 400~ms between accepted beat events and calculates
+\begin{equation}
+\mathrm{BPM}_{\mathrm{candidate}}=\frac{60000}{\Delta t_{\mathrm{ms}}}.
+\end{equation}
+Only candidates strictly between 50 and 130~BPM enter an eight-value buffer. Once at least five values exist, the routine sorts them, removes the smallest and largest, and averages the remainder. The displayed estimate applies additional smoothing with coefficients 0.97 and 0.03. These choices reduce visible variation but delay changes and exclude pulse rates outside the acceptance range.
+
+The oxygen estimate uses peak-to-peak AC amplitudes and DC levels:
+\begin{equation}
+R=\frac{A_{\mathrm{red,pp}}/D_{\mathrm{red}}}{A_{\mathrm{IR,pp}}/D_{\mathrm{IR}}},\qquad
+S_{\mathrm{candidate}}=110-25R.
+\end{equation}
+The candidate is restricted to 80--100\%, then smoothed as $S[n]=0.9S[n-1]+0.1S_{\mathrm{candidate}}$ after initialization. These are the implemented algorithm and output limits, not verified oxygen-saturation accuracy. The archive supplies no reference-device comparison or calibration record.
+
+\subsubsection{ECG Acquisition}
+The AD8232 is a single-lead signal-conditioning front end designed to interface with an ADC~\cite{ad8232}. Its output feeds ESP32 ADC1 channel~6 on GPIO~34; LO+ and LO$-$ feed GPIO~25 and GPIO~26. If either lead-off input is high, the firmware sets the ECG value to zero. Otherwise it reads one raw ADC sample. The web chart receives only the latest cloud-published sample and therefore does not reproduce the complete locally acquired waveform.
+
+\subsubsection{Load-Cell Fluid Estimate}
+The HX711 serial interface is read through data and clock GPIOs. After the firmware's 24-bit conversion, a nonzero transformed count $W[n]$ is mapped to the nonnegative fluid proxy
+\begin{equation}
+V_{\mathrm{raw}}[n]=\max\!\left(0,\frac{W[n]-8388608}{1000}\right).
+\end{equation}
+When the stored estimate is zero, the new value is adopted directly; otherwise the update is
+\begin{equation}
+V[n]=0.85V[n-1]+0.15V_{\mathrm{raw}}[n].
+\end{equation}
+The firmware and dashboard express $V$ in mL. A physical weight-to-volume measurement also requires a documented tare, calibration factor, mounting condition, and fluid-density assumption. Since these are absent, this report describes $V$ as a remaining-fluid estimate or proxy rather than a calibrated volume measurement. A timeout retains the previous estimate without an explicit invalid-data flag.
+
+\subsection{Actuator Rules and Motion Sequences}
+Three LEDC channels share a 50~Hz, 13-bit PWM timer. The ideal angle-to-pulse relation for servo angle $\theta$ is
+\begin{equation}
+t_p(\theta)=500+\frac{2000\theta}{180}\quad (\mu\mathrm{s}),\qquad 0\leq\theta\leq180.
+\end{equation}
+The nominal frame duration is 20000~$\mu$s. The implementation uses integer division for the pulse-width term and then quantizes duty to the timer's resolution. Commanded angle is the software state; no external position sensor establishes the mechanical angle.
+
+\subsubsection{Saline Stopping Rule}
+For configured threshold $T_s$, the clamp condition is
+\begin{equation}\label{eq:saline}
+C_s=(T_s>0)\land(V<T_s).
+\end{equation}
+When true, the saline angle increases by $2^{\circ}$ per loop toward $180^{\circ}$ and the reported state progresses from \emph{Closing} to \emph{Stopped}. Otherwise the angle decreases by $2^{\circ}$ toward zero and the state progresses from \emph{Opening} to \emph{Open}. Equality does not initiate closing. This is a remaining-volume stop rule; it does not command a continuous infusion rate in mL/h.
+
+\subsubsection{Syringe Sequence}
+For threshold $T_d$, the volume-based condition is $(T_d>0)\land(V<T_d)$. The firmware also checks whether the current local hour and minute match \code{dose_time}, if such a setting has been parsed. Either condition starts a cycle when no cycle is active. The servo advances by $1^{\circ}$ per loop toward $180^{\circ}$, reports \emph{Pushing}, then requests a cloud reset of \code{dose_trigger_ml} and returns by $2^{\circ}$ per loop toward zero. The final state is \emph{Standby}.
+
+No programmed syringe volume, plunger-position measurement, or flow calibration is supplied. The web reset button clears a trigger value and does not implement an immediate abort of an active cycle. The time condition has no once-per-event latch, so additional cycles can start while the matching minute remains active. These limitations are considered in Section~\ref{sec:discussion}.
+
+\subsubsection{Oxygen-Designated Servo and Buzzer}
+The local condition is $0<S<85\%$. When true, the firmware sets the buzzer GPIO high and advances the oxygen-designated servo by $2^{\circ}$ per loop. Otherwise it silences the buzzer and returns the servo toward zero. The 85\% value is a project constant and is not presented as a clinically approved treatment threshold. The photographs include a mask and tubing, but no oxygen-flow sensor or measured delivery result establishes the mechanism's therapeutic effect.
+
+\subsection{Cloud Data and Web Interfaces}
+Table~\ref{tab:schema} lists the active cloud fields. The doctor page listens for telemetry and settings changes, plots a rolling buffer of 50 received ECG values, and writes two fluid thresholds. Its open button sets $T_s=0$; its close button sets $T_s=9999$, making the clamp condition true when the estimated volume is below that sentinel. The reset button sets $T_d=0$.
+
+\begin{table}[!t]
+\caption{Implemented Firebase Data Contract}\label{tab:schema}
+\centering\footnotesize
+\begin{tabularx}{\columnwidth}{@{}P{0.20\columnwidth}YY@{}}
+\toprule
+Path & Fields & Purpose \\
+\midrule
+\code{/vitals} & \code{bpm}, \code{spo2}, \code{ecg}, \code{current_ml} & Latest processed estimates and raw ECG sample. \\
+\code{/vitals} & \code{saline_status}, \code{dose_status} & Software-reported servo sequence states. \\
+\code{/settings} & \code{saline_stop_ml}, \code{dose_trigger_ml} & Remaining-volume control thresholds. \\
+\code{/settings} & \code{dose_time} & Firmware-only hour/minute trigger; no corresponding web control. \\
+\path{/users/<uid>} & \code{email}, \code{role} & Registration record used for login routing. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Registration uses Firebase email/password authentication and stores a selected patient, family, or doctor role. Login reads this role to select a page. Patient and family pages include a signed-in check; the archived doctor page lacks an authentication guard and retains configuration placeholders. Therefore the report distinguishes role-based page routing from verified role-based authorization, which requires server-enforced access rules~\cite{firebaserules}.
+
+The patient view labels a zero reading as \emph{Sensor Ready / Place Finger}. The family view displays an alert for BPM above 120, positive BPM below 50, or positive SpO\textsubscript{2} below 92\%. The doctor view uses positive SpO\textsubscript{2} below 85\% for its oxygen warning and interprets an ECG value of zero as lead disconnection. These inconsistent prototype display thresholds are documented rather than reconciled by assuming a common medical policy.
+
